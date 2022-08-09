@@ -1,19 +1,7 @@
-﻿#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef TAGESDATEN_H
+#define TAGESDATEN_H
 
-#include <QMainWindow>
 #include <QDebug>
-#include <QRegularExpression>
-#include <QRegularExpressionMatch>
-#include <QFile>
-#include <QFileDialog>
-#include <QIODevice>
-#include <QTextStream>
-
-
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
 
 class Tagesdaten
 {
@@ -46,15 +34,31 @@ public:
     bool getIn_otherline() const;
     void setIn_otherline(bool newIn_otherline);
 
-    const QList<QString> &getArbeitszeit() const;
-    void add_toarbeitszeit(QString anfang, QString ende);
-
     void removeAllTimes();
 
     void add_tagesende(QString soll, QString netto, QString diff, QString saldo);
 
+    void add_toarbeitszeit(QString anfang, QString ende);
 
     const QList<QString> &getTagesende() const;
+
+    const QList<QString> &getKommt() const;
+    void setKommt(QString newKommt);
+
+    const QList<QString> &getGeht() const;
+    void setGeht(QString newGeht);
+
+    bool already_inKommt(QString anfang);
+
+    bool already_inGeht(QString ende);
+
+    const QList<QString> &getFlexArbkommt() const;
+    void setFlexArbkommt(QString newFlexArb);
+
+    bool already_inflexArb(QString anfang);
+
+    const QList<QString> &getFlexArbgeht() const;
+    void setFlexArbgeht(QString newFlexArbgeht);
 
 private:
     QString tag;
@@ -64,27 +68,14 @@ private:
     QString netto_zeit;
     QString zeit_diff;
     QString zeit_saldo;
-    QList <QString> arbeitszeit;
+    QList <QString> Kommt;
+    QList <QString> Geht;
+    QList <QString> flexArbkommt;
+    QList <QString> flexArbgeht;
     bool end_line = false;
     bool in_otherline = false;
 };
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
 
-public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
 
-private:
-    Ui::MainWindow *ui;
-    QString fileName;   
-    Tagesdaten process_line(QString s,Tagesdaten *data);
-
-private slots:
-    void loadFile();
-
-};
-
-#endif // MAINWINDOW_H
+#endif // TAGESDATEN_H

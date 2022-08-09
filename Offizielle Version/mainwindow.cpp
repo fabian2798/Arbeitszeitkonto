@@ -2,6 +2,12 @@
 #include "ui_mainwindow.h"
 #include "Tagesdaten.h"
 
+//TO DO: Testen mit Homeoffice und Standortarbeit am selben Tag
+//TO DO: Skip Sa/So unnessecary for Trainees
+//TO DO: UI-Design verbessern
+//TO DO: Zeitberechnung mit Berücksichtigung der Pausenzeiten
+//TO DO: Wochenende übernimmt manchmal die Arbeitskürzel vom vor Tag
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -26,9 +32,15 @@ void MainWindow::loadFile()
 
     QTextStream in(&file);
     QString Zeile;
+    QString Kommt;
+    QString Geht;
+    QString flexKommt;
+    QString flexGeht;
+
     //Darstellung der Daten des akutell verwendeten Files
     ui->listWidget_2->clear();
     ui->listWidget_3->clear();
+    ui->listWidget_4->clear();
 
     Tagesdaten day_data = Tagesdaten();
 
@@ -37,18 +49,27 @@ void MainWindow::loadFile()
        day_data = process_line(line,&day_data);
        //Ende jedes Tages
        if(day_data.getEnd_line() == true){
-           Zeile = "Tagesdaten Objekt: " + day_data.getTag() + " " + day_data.getTages_nr() + " " + day_data.getArb_art() + " " + day_data.getSoll_zeit() + " " +
+           Zeile = day_data.getTag() + " " + day_data.getTages_nr() + " " + day_data.getArb_art() + " " + day_data.getSoll_zeit() + " " +
                        day_data.getNetto_zeit() + " " + day_data.getZeit_diff() + " " + day_data.getZeit_saldo();
            ui->listWidget_3->addItem(Zeile);
-           ui->listWidget_3->addItem("Arbeitszeit:");
-           //qDebug() << day_data.getArbeitszeit();
-           ui->listWidget_3->addItems(day_data.getArbeitszeit()); // jeder Eintrag eine Zeile im Widget
-           day_data.removeAllTimes(); //QList.clear()
 
-           //zusätzliche Tätigkeiten
-           //Berechnung der Nettozeit anhand der Arbeitszeit->List
-           //mit Berücksichtigung der Pausen
-           //optionale Berücksichtigung der arbeitsortbezogenen Arbeitszeiten
+           if(day_data.getKommt().size() > 0 && day_data.getGeht().size() > 0){
+               Kommt = "K " + day_data.getTag() + " " + day_data.getTages_nr();
+               Geht = "G " + day_data.getTag() + " " + day_data.getTages_nr();
+               ui->listWidget_2->addItem(Kommt);
+               ui->listWidget_2->addItems(day_data.getKommt());
+               ui->listWidget_2->addItem(Geht);
+               ui->listWidget_2->addItems(day_data.getGeht());
+           }
+           if(day_data.getFlexArbkommt().size() > 0){
+               flexKommt = "FlexArbKommt " + day_data.getTag() + " " + day_data.getTages_nr();
+               flexGeht = "FlexArbGeht " + day_data.getTag() + " " + day_data.getTages_nr();
+               ui->listWidget_4->addItem(flexKommt);
+               ui->listWidget_4->addItems(day_data.getFlexArbkommt());
+               ui->listWidget_4->addItem(flexGeht);
+               ui->listWidget_4->addItems(day_data.getFlexArbgeht());
+           }
+           day_data.removeAllTimes(); //QList.clear()
        }
        }
 
@@ -57,8 +78,8 @@ void MainWindow::loadFile()
 }
 
 Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data){
-    QString pattern_monthyear(R"(^(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(\d\d\d\d)$)"); //Kennung: <Monat> <Jahr>
-    QString pattern_first(R"(^(Mo|Di|Mi|Do|Fr|Sa|So)\s+1.*Periode\s+([+-]\d{1,4}\.\d{2})*)"); //To DO: Skip Sa/So unnessecary for Trainees
+    QString pattern_monthyear(R"(^(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(\d\d\d\d)$)");
+    QString pattern_first(R"(^(Mo|Di|Mi|Do|Fr|Sa|So)\s+1.*Periode\s+([+-]\d{1,4}\.\d{2})*)");
     QString pattern_day(R"(^(\w{2}|\s+)\s+(\d\d?)\s+\d{1,4}\s+\|\s+(\d{1,2}:\d{2})?\s+-?\s{1,2}(\d{1,2}:\d{2})[+ *]{3}\s+(.*)\|(.*)\|(.*))");
     QString pattern_shorts(R"((\sFA\s|\sURL\s|\sGLT\s|\sF\s|\sABS\s))"); // Für Arbeitskürzel in anderen Zeile
 
@@ -86,7 +107,7 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data){
         month = match0.captured(1);
         year = match0.captured(2);
         line = month + " " + year;
-        ui->listWidget_2->addItem(line);
+        //ui->listWidget_2->addItem(line);
         qDebug()<<month<<"  "<<year;
     }
     // sucht erste Zeile mit Periodenübertrag
@@ -102,8 +123,8 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data){
         data->setTages_nr(day_nr);
         uebertrag = match1.captured(2);
         line = day + " " + day_nr + " " + uebertrag;
-        ui->listWidget_2->addItem(line);
-        qDebug()<<day<<day_nr<<uebertrag;
+        //ui->listWidget_2->addItem(line);
+        qDebug()<<day<<day_nr<<uebertrag<<"fist day";
     }
     // filtert die Tageszeile
     QRegularExpressionMatch match2 = re2.match(s);
@@ -119,8 +140,12 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data){
 
         anfang = match2.captured(3);
         ende = match2.captured(4);
+        qDebug() << anfang<<"anfangszeit";
+        qDebug() << ende << "endzeit";
 
+        // Zeiterfassung
         data->add_toarbeitszeit(anfang, ende);
+
 
         mittelteil1 = match2.captured(5).trimmed();
 
@@ -132,11 +157,10 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data){
         mittelteil2 = match2.captured(6);
         if(!day.trimmed().isEmpty()){
             line = day + " " + day_nr + " " + mittelteil1;
-            ui->listWidget_2->addItem(line);
+            //ui->listWidget_2->addItem(line);
             qDebug()<<day<<day_nr<<mittelteil1;
         }
-        qDebug() << anfang<<"anfangszeit";
-        qDebug() << ende << "endzeit";
+
         endteil = match2.captured(7);
 
         //Ende des Tageserreicht
@@ -157,8 +181,8 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data){
             else{
                 data->setZeit_saldo(endteil_pieces.value(11));
             }
-            ui->listWidget_2->addItem(line);
-           qDebug() << endteil;
+            //ui->listWidget_2->addItem(line);
+           qDebug() << endteil<<"end";
         }
     }
 
@@ -175,4 +199,3 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data){
 
     return *data;
 }
-
