@@ -10,7 +10,8 @@
 #include <QIODevice>
 #include <QTextStream>
 #include "Tagesdaten.h"
-
+#include "monat.h"
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,8 +30,12 @@ public:
 private:
     Ui::MainWindow *ui;
     QString fileName;   
-    Tagesdaten process_line(QString s,Tagesdaten *data);
-
+    Tagesdaten process_line(QString s,Tagesdaten *data, monat *m_data);
+    Tagesdaten end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten *data);
+    Tagesdaten end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten *data);
+    QString Minutes_toString(qint32 zeit_Min);
+    void toMinutesandHours(monat *m_data);
+    QString get_monatsView(monat *m_data);
 private slots:
     void loadFile();
 

@@ -2,6 +2,7 @@
 #define TAGESDATEN_H
 
 #include <QDebug>
+#include <QTime>
 
 class Tagesdaten
 {
@@ -34,7 +35,7 @@ public:
     bool getIn_otherline() const;
     void setIn_otherline(bool newIn_otherline);
 
-    void removeAllTimes();
+    void clearAllTimes();
 
     void add_tagesende(QString soll, QString netto, QString diff, QString saldo);
 
@@ -60,7 +61,43 @@ public:
     const QList<QString> &getFlexArbgeht() const;
     void setFlexArbgeht(QString newFlexArbgeht);
 
+    qint32 getGesamte_tageszeit() const;
+    void setGesamte_tageszeit(qint32 flex, qint32 netto,qint32 pause);
+
+    void calc_breaktime();
+
+    qint32 getPausenzeit() const;
+
+    void setPausenzeit(qint32 newPausenzeit);
+
+    qint32 getNetto_int() const;
+    void add_toNetto_int(qint32 newNetto_int);
+    void setNetto_int(qint32 newNetto_int);
+
+    qint32 getFlexNetto_int() const;
+    void add_toFlexNetto_int(qint32 newFlexNetto_int);
+    void setFlexNetto_int(qint32 newFlexNetto_int);
+
+    const QList<qint32> &getRemember_timekommt() const;
+    void setRemember_timekommt(qint32 newRemember_timekommt);
+
+    const QList<qint32> &getRemember_timegeht() const;
+    void setRemember_timegeht(qint32 newRemember_timegeht);
+
+    const QList<qint32> &getRemember_timeflexkommt() const;
+    void setRemember_timeflexkommt(qint32 newRemember_timeflexkommt);
+
+    const QList<qint32> &getRemember_timeflexgeht() const;
+    void setRemember_timeflexgeht(qint32 newRemember_timeflexgeht);
+
+    qint32 just_Minutes(QString zeit);
+
 private:
+    qint32 gesamte_tageszeit = 0;
+    qint32 pausenzeit = 0;
+    qint32 netto_int = 0;
+    qint32 flexNetto_int = 0;
+
     QString tag;
     QString tages_nr;
     QString arb_art;
@@ -68,10 +105,17 @@ private:
     QString netto_zeit;
     QString zeit_diff;
     QString zeit_saldo;
+
     QList <QString> Kommt;
     QList <QString> Geht;
     QList <QString> flexArbkommt;
     QList <QString> flexArbgeht;
+
+    QList <qint32> kommt;
+    QList <qint32> geht;
+    QList <qint32> flexkommt;
+    QList <qint32> flexgeht;
+
     bool end_line = false;
     bool in_otherline = false;
 };

@@ -11,11 +11,13 @@ CONFIG += c++17
 SOURCES += \
     Tagesdaten.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    monat.cpp
 
 HEADERS += \
     Tagesdaten.h \
-    mainwindow.h
+    mainwindow.h \
+    monat.h
 
 FORMS += \
     mainwindow.ui
