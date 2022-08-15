@@ -1,12 +1,7 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
-//TO DO: Testen mit Homeoffice und Standortarbeit am selben Tag
-//TO DO: Skip Sa/So unnessecary for Trainees
 //TO DO: UI-Design verbessern
-//TO DO: Zeitberechnung mit Berücksichtigung der Pausenzeiten
-//TO DO: Wochenende übernimmt manchmal die Arbeitskürzel vom vor Tag
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -68,7 +63,6 @@ void MainWindow::loadFile()
                    kommt_int = day_data.just_Minutes(temp_kommt[i]);
                    geht_int = day_data.just_Minutes(temp_geht[i]);
                    end_calc(kommt_int,geht_int,&day_data);
-
                }
            }
            if(day_data.getFlexArbkommt().size() > 0){
@@ -82,23 +76,24 @@ void MainWindow::loadFile()
            }
            //Berechnung der Gesamtarbeitszeit
            day_data.calc_breaktime();//Berechne Pausenzeiten
+
            day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(),day_data.getNetto_int(),day_data.getPausenzeit());
+
            Zeile = "<"+day_data.getTag()+">" + "  " + day_data.getTages_nr() + " " + day_data.getArb_art() + " " + "Soll: " + day_data.getSoll_zeit() + " " +
                        "NT: " + day_data.getNetto_zeit() + " " + "Diff: " + day_data.getZeit_diff() + " " + "Saldo: " + day_data.getZeit_saldo();
            ui->listWidget_3->addItem(Zeile);
+
            if(day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0){
-               //qDebug() << "büro";
            monats_data.setGes_Nettozeit(day_data.getNetto_int()-day_data.getPausenzeit());
            }
            if(day_data.getFlexNetto_int() > 0 && day_data.getNetto_int() == 0){
-               //qDebug() << "flex";
            monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int()-day_data.getPausenzeit());
            }
            if(day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() > 0){
-               //qDebug() << "both";
                monats_data.setGes_Nettozeit(day_data.getNetto_int());
                monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int()-day_data.getPausenzeit());
            }
+
            monats_data.setGesamt(day_data.getGesamte_tageszeit());
            day_data.clearAllTimes(); //QList.clear()
        }
@@ -233,6 +228,7 @@ Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten
     data->setRemember_timegeht(end_inMin);
     qint32 diff_inMin = end_inMin - begin_inMin;
     data->add_toNetto_int(diff_inMin); //gearbeitete Zeit im Büro
+    qDebug() << "Zeit im Büro" << data->getNetto_int();
     return *data;
 }
 
@@ -241,6 +237,7 @@ Tagesdaten MainWindow::end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesd
     data->setRemember_timeflexgeht(end_inMin);
     qint32 diff_inMin = end_inMin - begin_inMin;
     data->add_toFlexNetto_int(diff_inMin); //gearbeitete Zeit im Homeoffice
+    qDebug() << "Zeit im HO" << data->getFlexNetto_int();
     return *data;
 }
 
@@ -259,18 +256,23 @@ QString MainWindow::get_monatsView(monat *m_data){
 }
 
 void MainWindow::toMinutesandHours(monat *m_data){
-    qDebug() << m_data->getGes_Nettozeit();
     qint32 minutes = m_data->getGes_Nettozeit() % 60;
     qint32 stunden = m_data->getGes_Nettozeit() / 60;
-    qDebug() << m_data->getGes_Flexnettozeit();
+
     qint32 flminutes = m_data->getGes_Flexnettozeit() % 60;
     qint32 flstunden = m_data->getGes_Flexnettozeit() / 60;
+
     qint32 ges_minutes = m_data->getGesamt() % 60;
     qint32 ges_stunden = m_data->getGesamt() / 60;
-    double faProzent = (m_data->getGes_Flexnettozeit()/m_data->getGesamt())*100;
+
+    double flnt = m_data->getGes_Flexnettozeit();
+    double gesamtzeit = m_data->getGesamt();
+    double faProzent = (flnt/gesamtzeit)*100;
+
     QString ges_zeit = Minutes_toString(ges_stunden) + "." + Minutes_toString(ges_minutes);
     QString ges_nt = Minutes_toString(stunden) + "." + Minutes_toString(minutes);
     QString ges_fnt= Minutes_toString(flstunden) + "." + Minutes_toString(flminutes);
+
     m_data->setFaProzent(faProzent);
     m_data->setGesamtzeit(ges_zeit);
     m_data->setGes_nt(ges_nt);
