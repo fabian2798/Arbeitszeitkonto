@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 8.0.0, 2022-08-08T06:23:38. -->
+<!-- Written by QtCreator 8.0.0, 2022-08-15T13:00:45. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -235,8 +235,9 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Projects Qt/arbeitszeitkonto - Kopie - Kopie/arbeitszeitkonto.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Projects Qt/arbeitszeitkonto - Kopie - Kopie/arbeitszeitkonto.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">arbeitszeitkonto2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/fabif/OneDrive/Desktop/SVLFG/Arbeitszeitkonto/Version 4.8.22/arbeitszeitkonto.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/fabif/OneDrive/Desktop/SVLFG/Arbeitszeitkonto/Version 4.8.22/arbeitszeitkonto.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
