@@ -163,30 +163,44 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
         //Fehlbuchung FLexible Arbeit
         //z.B - 7:04
         //7:04 - 15:30
-        if(already_inflexArb(anfang) == true){//Spezialfall TO DO: Juni 24 - FlexArbgeht
-            //qDebug() << "0.5";
+        if(already_inflexArb(anfang) == true){
+            qDebug() << "0.5";
             flexArbgeht.append(ende);
         }
         if(flexArbkommt.size() == 0){
-            //qDebug() << "1";
+            qDebug() << "1";
             this->Kommt.append(anfang);
             this->Geht.append(ende);
         }
         if(arb_art == "FA" && flexArbgeht.size() == flexArbkommt.size() && already_inflexArb(anfang) == false){//Fehlbuchung bei Homeoffice -> wird angezeigt wie Bürotag
-            //qDebug() << "1.25";
+            if(!soll_zeit.isEmpty()){
+                qDebug() << "endteil" << soll_zeit << netto_zeit << zeit_diff << zeit_saldo;
+                qDebug() << "1.1";
+                //Falltest: 11.08.22
+                Kommt.append(anfang);
+                Geht.append(ende);
+            }
+            else{
+            qDebug() << "1.25";
+            //Spezial z.B 27.07.22
             flexArbkommt.append(anfang);
             flexArbgeht.append(ende);
+            }
         }
-        if(arb_art == "FA" && flexArbkommt.size() > flexArbgeht.size()){//Spezialfall Juni 24, zwei ungleiche Arbeitsanfänge mit nur einem Ende
-            //qDebug() << "1.5";
+        if(arb_art == "FA" && flexArbkommt.size() > flexArbgeht.size()){
+            //z.b - 6.35
+            // 6.36 - 14.53
+            // zweiter Begin wird nicht erfasst
+            qDebug() << "1.5";
             flexArbgeht.append(ende);
         }
     }
     //mögliche Falschbuchung
     //wird vermutlich doppelt vorkommen
+    //z.B 15.32 - 15.32
     else{
         if(Kommt.contains(anfang) == true && !ende.isEmpty() && anfang.compare(ende) != 0){
-            //qDebug() << "2";
+            qDebug() << "2";
             this->Kommt.append(ende);
         }
         //z.B 6:20 - 14:41
@@ -194,7 +208,7 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
         if(!anfang.isEmpty() && ende.isEmpty()){//Wird bisher nicht vom Regex aufgenommen, siehe übergeordnetes Beispiel
             //qDebug() << "3";
             if(already_inGeht(anfang) == false){
-                //qDebug() << "3.3";
+                qDebug() << "3.3";
                 this->Kommt.append(anfang);
                 }
         }
@@ -202,26 +216,26 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
             if(ende.compare("0:00") != 0 && already_inflexArb(ende) == false){ // Leerbuchung ausgeschlossen
                 //qDebug() << "4.0";
                 if(flexArbkommt.size() > flexArbgeht.size()){
-                    //qDebug() << "4.5";
+                    qDebug() << "4.5";
                     this->flexArbgeht.append(ende);
                 }
                 if(flexArbkommt.size() < flexArbgeht.size() || flexArbkommt.size() == 0){
-                    //qDebug() << "4.75";
+                    qDebug() << "4.75";
                     this->flexArbkommt.append(ende);
                 }
                 if(flexArbkommt.size() == flexArbgeht.size() && already_inflexArb(ende) == false && flexArbgeht.contains(ende) == false){//erneute Buchung im Homeoffice
-                    //qDebug() << "4.8";
+                    qDebug() << "4.8";
                     this->flexArbkommt.append(ende);
                 }
             }
         }
         if(anfang.compare(ende) == 0 && Kommt.size() > Geht.size()){ //Falschbuchung nur einmal aufnehmen , wenn eine bereits in Kommt enthalten
-              //qDebug() << "5";
+              qDebug() << "5";
             this->Geht.append(anfang);
         }
 
         if(anfang.compare(ende) == 0 && (Kommt.size() == Geht.size() || Kommt.size() == 0) && already_inGeht(anfang) == false){ //Falschbuchung nur einmal aufnehmen , erstes Auftreten
-              //qDebug() << "6";
+              qDebug() << "6";
             this->Kommt.append(anfang);
         }
     }
@@ -240,6 +254,10 @@ void Tagesdaten::clearAllTimes(){
    pausenzeit = 0;
    netto_int = 0;
    flexNetto_int = 0;
+   soll_zeit = "";
+   netto_zeit = "";
+   zeit_diff = "";
+   zeit_saldo = "";
 }
 
 qint32 Tagesdaten::getPausenzeit() const
