@@ -1,7 +1,12 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-//TO DO: UI-Design verbessern
+//TO DO: UI-Design verbessern (z.B Statusbar einfügen -> File öffnen,Datenbank öffnen)
+//TO DO: Arbeitszeiten können nur zwischen und 6 und 19 Uhr eingelesen werden -> Benötige Absegnung über Vorgang
+//TO DO: Mögliche Umstrukturierung der Pausenzeit - & Arbeitszeitalgortihmen -> geringe Priorität
+//TO DO: Einbindung der Daten in eine Datenbank (SQLITE)
+//TO DO: Überstunden werden noch nicht anders gewertet, zählen bisher einfach in die normale Arbeitszeit hinein -> Frage: Ob Überstunden mit in %-Anzahl einbezogen werden soll
+//TO DO: Tagesübersichtszeile anpassen
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -10,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->tag_view->setText("Tagesübersicht");
     ui->monat_view->setText("Monatsübersicht");
+    ui->db_view->setText("Datenbankübersicht");
 }
 
 MainWindow::~MainWindow()
@@ -20,7 +26,7 @@ MainWindow::~MainWindow()
 void MainWindow::loadFile()
 {
     fileName = QFileDialog::getOpenFileName(this,
-        tr("Öffne Zeus Textdatei"), "C:/Projects Qt/arbeitszeitkonto", tr("Zeus Datei (*.csv *.txt)"));
+        tr("Öffne Zeus Textdatei"), "C:/Projects Qt/arbeitszeitkonto", tr("Zeus Datei (*.csv *.txt)")); // "/home" -> Startverzeichnis ändern
     if(fileName.isEmpty())
         return;
     QFile file(fileName);
@@ -28,6 +34,7 @@ void MainWindow::loadFile()
            return;}
 
     QTextStream in(&file);
+
     QString Zeile;
     QString Kommt;
     QString Geht;
@@ -49,13 +56,13 @@ void MainWindow::loadFile()
 
     Tagesdaten day_data = Tagesdaten();
     monat monats_data = monat();
+    dbhandle db_data = dbhandle();
 
     while (!in.atEnd()) {
        QString line = in.readLine();
        day_data = process_line(line,&day_data,&monats_data);
        //Ende jedes Tages
        if(day_data.getEnd_line() == true){
-           //Zur Ausgabe der Daten
            if(day_data.getKommt().size() > 0){
                QList <QString> temp_geht = day_data.getGeht();
                QList <QString> temp_kommt = day_data.getKommt();
@@ -74,33 +81,50 @@ void MainWindow::loadFile()
                    end_flexcalc(flexkommt_int,flexgeht_int,&day_data);
                }
            }
+           //Berechne Pausenzeiten
+           day_data.calc_breaktime();
            //Berechnung der Gesamtarbeitszeit
-           day_data.calc_breaktime();//Berechne Pausenzeiten
+           day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(),day_data.getNetto_int(),day_data.getPausenzeit()); // (Flex+NT) - Pause
 
-           day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(),day_data.getNetto_int(),day_data.getPausenzeit());
-           qDebug() << "Tagesarbeitszeit: " << day_data.getGesamte_tageszeit();
-           Zeile = "<"+day_data.getTag()+">" + "  " + day_data.getTages_nr() + " " + day_data.getArb_art() + " " + "Soll: " + day_data.getSoll_zeit() + " " +
-                       "NT: " + day_data.getNetto_zeit() + " " + "Diff: " + day_data.getZeit_diff() + " " + "Saldo: " + day_data.getZeit_saldo();
-           ui->listWidget_3->addItem(Zeile);
-
+           //Soll doppelte Buchung der Pausenzeit verhindern
+           //Monatsdaten werden jeden Tag um die rohe Arbeitszeit(mit Pausenabzug) addiert
            if(day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0){
            monats_data.setGes_Nettozeit(day_data.getNetto_int()-day_data.getPausenzeit());
+           day_data.setOffice_time_pause();//officetime = netto - pause, flexible_time = flex
            }
            if(day_data.getFlexNetto_int() > 0 && day_data.getNetto_int() == 0){
            monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int()-day_data.getPausenzeit());
+           day_data.setFlexible_time_pause(); // flexible_time = flex - pause, office_time = netto
            }
+           //Soll Minuszeiten verhindern falls Arbeitszeit zu kurz zum Pausenabzug war
            if(day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() > 0){
-               monats_data.setGes_Nettozeit(day_data.getNetto_int());
-               monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int()-day_data.getPausenzeit());
+               if((day_data.getFlexNetto_int() > 45 && day_data.getNetto_int() < 45) || (day_data.getNetto_int() > 45 && day_data.getFlexNetto_int() > 45)){
+                    monats_data.setGes_Nettozeit(day_data.getNetto_int());
+                    monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int()-day_data.getPausenzeit());
+                    day_data.setFlexible_time_pause();
+               }
+               if(day_data.getNetto_int() > 45 && day_data.getFlexNetto_int() < 45){
+                   monats_data.setGes_Nettozeit(day_data.getNetto_int()-day_data.getPausenzeit());
+                   monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int());
+                   day_data.setOffice_time_pause();
+               }
            }
 
-           monats_data.setGesamt(day_data.getGesamte_tageszeit());
+           qDebug() << "Tagesarbeitszeit: " << day_data.getGesamte_tageszeit();
+           Zeile = "<"+day_data.getTag()+">" + "  " + day_data.getTages_nr() + " " + day_data.getArb_art() + " " + "Büro: " + day_data.getOffice_time() + " " +
+                   "FA: " + day_data.getFlexible_time() + " " + "Soll: " + day_data.getSoll_zeit() + " " +
+                       "NT: " + day_data.getNetto_zeit() + " " + "Diff: " + day_data.getZeit_diff() + " " + "Saldo: " + day_data.getZeit_saldo();
+           ui->listWidget_3->addItem(Zeile);
+
+           db_data.insert_table(&day_data, &monats_data);
+
+           monats_data.setGesamt(day_data.getGesamte_tageszeit());// Add Tagesgesamt
            day_data.clearAllTimes(); //QList.clear()
        }
        }
     //Monatsübersicht
-    toMinutesandHours(&monats_data);
-    mView = get_monatsView(&monats_data);
+    toMinutesandHours(&monats_data); // (Int) Minuten to (String) Hour.Minuten
+    mView = get_monatsView(&monats_data); // Return Übersichtsstring des Monats
     ui->listWidget_2->addItem(mView);
 
 
@@ -114,7 +138,7 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data, monat *m_data){
     QString pattern_first(R"(^(Mo|Di|Mi|Do|Fr|Sa|So)\s+1.*Periode\s+([+-]\d{1,4}\.\d{2})*)");
     QString pattern_day(R"(^(\w{2}|\s+)\s+(\d\d?)\s+\d{1,4}\s+\|\s+(\d{1,2}:\d{2})?\s+-?\s{1,2}(\d{1,2}:\d{2})[+ *]{3}\s+(.*)\|(.*)\|(.*))");
 
-    QString pattern_shorts(R"((\sFA\s|\sURL\s|\sGLT\s|\sF\s|\sABS\s))"); // Für Arbeitskürzel in anderen Zeile
+    QString pattern_shorts(R"((\sFA\s|\sURL\s|\sGLT\s|\sF\s|\sABS\s|\sKRK\s))"); // Für Arbeitskürzel in anderen Zeile
 
     static QRegularExpression re0(pattern_monthyear);
     static QRegularExpression re1(pattern_first);
@@ -171,8 +195,6 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data, monat *m_data){
 
         anfang = match2.captured(3);
         ende = match2.captured(4);
-        qDebug() << anfang<<"anfangszeit";
-        qDebug() << ende << "endzeit";
 
         mittelteil1 = match2.captured(5).trimmed();
 
@@ -206,7 +228,8 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data, monat *m_data){
                 data->setZeit_saldo(endteil_pieces.value(11));
             }
         }
-
+        qDebug() << anfang<<"anfangszeit";
+        qDebug() << ende << "endzeit";
         // Zeiterfassung
         data->add_toarbeitszeit(anfang, ende);
     }
@@ -222,7 +245,7 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data, monat *m_data){
 
     return *data;
 }
-
+//Büroarbeitszeit berechnen
 Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten *data){
     data->setRemember_timekommt(begin_inMin);
     data->setRemember_timegeht(end_inMin);
@@ -231,7 +254,7 @@ Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten
     //qDebug() << "Zeit im Büro" << data->getNetto_int();
     return *data;
 }
-
+//Homeofficearbeitszeit berechnen
 Tagesdaten MainWindow::end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten *data){
     data->setRemember_timeflexkommt(begin_inMin);
     data->setRemember_timeflexgeht(end_inMin);
@@ -277,3 +300,4 @@ void MainWindow::toMinutesandHours(monat *m_data){
     m_data->setGes_nt(ges_nt);
     m_data->setGes_fnt(ges_fnt);
 }
+

@@ -92,6 +92,12 @@ public:
 
     qint32 just_Minutes(QString zeit);
 
+    const QString &getOffice_time() const;
+    void setOffice_time_pause();
+
+    const QString &getFlexible_time() const;
+    void setFlexible_time_pause();
+
 private:
     qint32 gesamte_tageszeit = 0;
     qint32 pausenzeit = 0;
@@ -101,10 +107,15 @@ private:
     QString tag;
     QString tages_nr;
     QString arb_art;
+
+    //endteil
     QString soll_zeit;
     QString netto_zeit;
     QString zeit_diff;
     QString zeit_saldo;
+
+    QString office_time;
+    QString flexible_time;
 
     QList <QString> Kommt;
     QList <QString> Geht;

@@ -11,6 +11,7 @@
 #include <QTextStream>
 #include "Tagesdaten.h"
 #include "monat.h"
+#include "dbhandle.h"
 #include <QString>
 
 QT_BEGIN_NAMESPACE
@@ -36,6 +37,7 @@ private:
     QString Minutes_toString(qint32 zeit_Min);
     void toMinutesandHours(monat *m_data);
     QString get_monatsView(monat *m_data);
+    void fill_table(dbhandle *db_data, Tagesdaten *day_data, monat *m_data);
 private slots:
     void loadFile();
 

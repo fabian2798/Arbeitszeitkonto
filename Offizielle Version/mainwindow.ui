@@ -25,7 +25,11 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QListWidget" name="listWidget"/>
+       <widget class="QListWidget" name="listWidget">
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustToContents</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -37,7 +41,11 @@
      </widget>
     </item>
     <item>
-     <widget class="QListWidget" name="listWidget_2"/>
+     <widget class="QListWidget" name="listWidget_2">
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QLabel" name="tag_view">
@@ -48,6 +56,26 @@
     </item>
     <item>
      <widget class="QListWidget" name="listWidget_3"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="db_view">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTableView" name="tableView">
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+      <attribute name="horizontalHeaderHighlightSections">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderCascadingSectionResizes">
+       <bool>false</bool>
+      </attribute>
+     </widget>
     </item>
    </layout>
   </widget>

@@ -157,32 +157,56 @@ void Tagesdaten::setGesamte_tageszeit(qint32 flex, qint32 netto,qint32 pause)
 }
 
 void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
-    //qDebug() << "Anfang";
-
+    //Gleitzeit beachten
+    if(!anfang.isEmpty()){
+    qint32 anfangint = just_Minutes(anfang);
+    //qDebug() << "anfangint: " << anfangint;
+    if(anfangint < 360){
+        //qDebug() << "anfang unter 6uhr";
+        anfang = "6:00";
+    }
+    if(anfangint > 1140){
+        //qDebug() << "anfang über 19uhr";
+        anfang = "19:00";
+    }
+    }
+    if(!ende.isEmpty()){
+    qint32 endeint = just_Minutes(ende);
+    //qDebug() << "endeint: " << endeint;
+    if(endeint < 360){
+        //qDebug() << "ende unter 6uhr";
+        ende = "6:00";
+    }
+    if(endeint > 1140){
+        //qDebug() << "ende über 19uhr";
+        ende = "19:00";
+    }
+    }
+        //qDebug() << "Anfang";
     if(!anfang.isEmpty() && !ende.isEmpty() && anfang.compare(ende) != 0){
         //Fehlbuchung FLexible Arbeit
         //z.B - 7:04
         //7:04 - 15:30
         if(already_inflexArb(anfang) == true){
-            qDebug() << "0.5";
+            //qDebug() << "0.5";
             flexArbgeht.append(ende);
         }
         if(flexArbkommt.size() == 0){
-            qDebug() << "1";
+            //qDebug() << "1";
             this->Kommt.append(anfang);
             this->Geht.append(ende);
         }
         if(arb_art == "FA" && flexArbgeht.size() == flexArbkommt.size() && already_inflexArb(anfang) == false){//Fehlbuchung bei Homeoffice -> wird angezeigt wie Bürotag
             if(!soll_zeit.isEmpty()){
-                qDebug() << "endteil" << soll_zeit << netto_zeit << zeit_diff << zeit_saldo;
-                qDebug() << "1.1";
-                //Falltest: 11.08.22
+                //qDebug() << "endteil" << soll_zeit << netto_zeit << zeit_diff << zeit_saldo;
+                //qDebug() << "1.1";
+                //Testfall: 11.08.22 -> Faketest.txt
                 Kommt.append(anfang);
                 Geht.append(ende);
             }
             else{
-            qDebug() << "1.25";
-            //Spezial z.B 27.07.22
+            //qDebug() << "1.25";
+            //Spezial z.B 27.07.22 -> Journale_juli.txt
             flexArbkommt.append(anfang);
             flexArbgeht.append(ende);
             }
@@ -191,7 +215,7 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
             //z.b - 6.35
             // 6.36 - 14.53
             // zweiter Begin wird nicht erfasst
-            qDebug() << "1.5";
+            //qDebug() << "1.5";
             flexArbgeht.append(ende);
         }
     }
@@ -200,7 +224,7 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     //z.B 15.32 - 15.32
     else{
         if(Kommt.contains(anfang) == true && !ende.isEmpty() && anfang.compare(ende) != 0){
-            qDebug() << "2";
+            //qDebug() << "2";
             this->Kommt.append(ende);
         }
         //z.B 6:20 - 14:41
@@ -208,7 +232,7 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
         if(!anfang.isEmpty() && ende.isEmpty()){//Wird bisher nicht vom Regex aufgenommen, siehe übergeordnetes Beispiel
             //qDebug() << "3";
             if(already_inGeht(anfang) == false){
-                qDebug() << "3.3";
+                //qDebug() << "3.3";
                 this->Kommt.append(anfang);
                 }
         }
@@ -216,26 +240,26 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
             if(ende.compare("0:00") != 0 && already_inflexArb(ende) == false){ // Leerbuchung ausgeschlossen
                 //qDebug() << "4.0";
                 if(flexArbkommt.size() > flexArbgeht.size()){
-                    qDebug() << "4.5";
+                    //qDebug() << "4.5";
                     this->flexArbgeht.append(ende);
                 }
                 if(flexArbkommt.size() < flexArbgeht.size() || flexArbkommt.size() == 0){
-                    qDebug() << "4.75";
+                    //qDebug() << "4.75";
                     this->flexArbkommt.append(ende);
                 }
                 if(flexArbkommt.size() == flexArbgeht.size() && already_inflexArb(ende) == false && flexArbgeht.contains(ende) == false){//erneute Buchung im Homeoffice
-                    qDebug() << "4.8";
+                    //qDebug() << "4.8";
                     this->flexArbkommt.append(ende);
                 }
             }
         }
         if(anfang.compare(ende) == 0 && Kommt.size() > Geht.size()){ //Falschbuchung nur einmal aufnehmen , wenn eine bereits in Kommt enthalten
-              qDebug() << "5";
+              //qDebug() << "5";
             this->Geht.append(anfang);
         }
 
         if(anfang.compare(ende) == 0 && (Kommt.size() == Geht.size() || Kommt.size() == 0) && already_inGeht(anfang) == false){ //Falschbuchung nur einmal aufnehmen , erstes Auftreten
-              qDebug() << "6";
+              //qDebug() << "6";
             this->Kommt.append(anfang);
         }
     }
@@ -258,6 +282,8 @@ void Tagesdaten::clearAllTimes(){
    netto_zeit = "";
    zeit_diff = "";
    zeit_saldo = "";
+   office_time = "0.0";
+   flexible_time = "0.0";
 }
 
 qint32 Tagesdaten::getPausenzeit() const
@@ -520,4 +546,48 @@ qint32 Tagesdaten::just_Minutes(QString zeit){
     QTime time = QTime::fromString(zeit, "H:mm");
     qint32 minutes = (time.hour() * 60) + time.minute();
     return minutes;
+}
+
+const QString &Tagesdaten::getOffice_time() const
+{
+    return office_time;
+}
+
+void Tagesdaten::setOffice_time_pause()
+{
+    netto_int = netto_int - pausenzeit;
+
+    qint32 officetime_min = netto_int % 60;
+    qint32 officetime_h = netto_int / 60;
+    QString of_min = QString::number(officetime_min);
+    QString of_h = QString::number(officetime_h);
+    qint32 flextime_min = flexNetto_int % 60;
+    qint32 flextime_h = flexNetto_int / 60;
+    QString f_min = QString::number(flextime_min);
+    QString f_h = QString::number(flextime_h);
+
+    office_time = of_h + "." + of_min;
+    flexible_time = f_h + "." + f_min;
+}
+
+const QString &Tagesdaten::getFlexible_time() const
+{
+    return flexible_time;
+}
+
+void Tagesdaten::setFlexible_time_pause()
+{
+    flexNetto_int = flexNetto_int - pausenzeit;
+
+    qint32 flextime_min = flexNetto_int % 60;
+    qint32 flextime_h = flexNetto_int / 60;
+    QString f_min = QString::number(flextime_min);
+    QString f_h = QString::number(flextime_h);
+    qint32 officetime_min = netto_int % 60;
+    qint32 officetime_h = netto_int / 60;
+    QString of_min = QString::number(officetime_min);
+    QString of_h = QString::number(officetime_h);
+
+    office_time = of_h + "." + of_min;
+    flexible_time = f_h + "." + f_min;
 }
