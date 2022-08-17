@@ -11,6 +11,9 @@
 #include <QTextStream>
 #include "Tagesdaten.h"
 #include "monat.h"
+#include "chartbuilder.h"
+#include "optionswindow.h"
+#include "helpwindow.h"
 #include <QString>
 #include <QSqlDatabase>
 #include <QSqlDriver>
@@ -53,9 +56,10 @@ private:
     QSqlDatabase db;
 
 private slots:
-    void loadFile();
     void drop_table();
-
+    void on_loadFile_clicked();
+    void on_pushButton_options_clicked();
+    void on_pushButton_help_clicked();
 };
 
 #endif // MAINWINDOW_H
