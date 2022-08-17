@@ -12,6 +12,10 @@
 #include "Tagesdaten.h"
 #include "monat.h"
 #include "dbhandle.h"
+#include "chartbuilder.h"
+#include "optionswindow.h"
+#include "helpwindow.h"
+
 #include <QString>
 
 QT_BEGIN_NAMESPACE
@@ -39,8 +43,9 @@ private:
     QString get_monatsView(monat *m_data);
     void fill_table(dbhandle *db_data, Tagesdaten *day_data, monat *m_data);
 private slots:
-    void loadFile();
-
+    void on_loadFile_clicked();
+    void on_pushButton_options_clicked();
+    void on_pushButton_help_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -1,4 +1,4 @@
-QT       += core gui sql
+QT       += core gui sql charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -10,19 +10,27 @@ CONFIG += c++17
 
 SOURCES += \
     Tagesdaten.cpp \
+    chartbuilder.cpp \
     dbhandle.cpp \
+    helpwindow.cpp \
     main.cpp \
     mainwindow.cpp \
-    monat.cpp
+    monat.cpp \
+    optionswindow.cpp
 
 HEADERS += \
     Tagesdaten.h \
+    chartbuilder.h \
     dbhandle.h \
+    helpwindow.h \
     mainwindow.h \
-    monat.h
+    monat.h \
+    optionswindow.h
 
 FORMS += \
-    mainwindow.ui
+    helpwindow.ui \
+    mainwindow.ui \
+    optionswindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
