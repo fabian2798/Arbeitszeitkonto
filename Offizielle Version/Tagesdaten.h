@@ -102,6 +102,11 @@ public:
     const QString &getDate() const;
     void setDate(const QString &newDate);
 
+    const QString &getMonthInt() const;
+    void setMonthInt(const QString &newMonthInt);
+
+    void setDaytimesZero();
+
 private:
     qint32 gesamte_tageszeit = 0;
     qint32 pausenzeit = 0;
@@ -131,6 +136,7 @@ private:
     QList <qint32> flexkommt;
     QList <qint32> flexgeht;
 
+    QString monthInt;
     QString date;
     bool end_line = false;
     bool in_otherline = false;

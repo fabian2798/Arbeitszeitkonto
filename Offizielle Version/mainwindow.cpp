@@ -1,12 +1,12 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-//TO DO: UI-Design verbessern (z.B Statusbar einfügen -> File öffnen,Datenbank öffnen)
+//TO DO: UI-Design verbessern (z.B Statusbar einfügen -> File öffnen,Datenbank öffnen)->Marten
 //TO DO: Arbeitszeiten können nur zwischen und 6 und 19 Uhr eingelesen werden -> Benötige Absegnung über Vorgang
 //TO DO: Mögliche Umstrukturierung der Pausenzeit - & Arbeitszeitalgortihmen -> geringe Priorität
-
 //TO DO: Überstunden werden noch nicht anders gewertet, zählen bisher einfach in die normale Arbeitszeit hinein -> Frage: Ob Überstunden mit in %-Anzahl einbezogen werden soll
-//TO DO: Tagesübersichtszeile anpassen (klare Darstellung)
+//TO DO: Tagesübersichtszeile anpassen (klare Darstellung)->Marten
+//TO DO: Monate bei meherigen Auseinlesen aktualisieren
 
 MainWindow::MainWindow(QWidget *parent) // Konstructor
     : QMainWindow(parent)
@@ -67,8 +67,9 @@ void MainWindow::loadFile()
     Tagesdaten day_data = Tagesdaten(); //Konstructor
     monat monats_data = monat();
 
-    //drop_table();
+    drop_table();
     create_table();
+    delete_month(&day_data); //Wenn der gleiche Monat eingelesen wird, soll gespeicherten Monat löschen
 
     while (!in.atEnd()) {
        QString line = in.readLine();
@@ -93,6 +94,7 @@ void MainWindow::loadFile()
                    end_flexcalc(flexkommt_int,flexgeht_int,&day_data);
                }
            }
+
            //Berechne Pausenzeiten
            day_data.calc_breaktime();
            //Berechnung der Gesamtarbeitszeit
@@ -120,6 +122,9 @@ void MainWindow::loadFile()
                    monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int());
                    day_data.setOffice_time_pause();
                }
+           }
+           if(day_data.getNetto_int() == 0 && day_data.getFlexNetto_int() == 0){
+               day_data.setDaytimesZero();
            }
            //Datumszeile
            dateString(&day_data, &monats_data);
@@ -366,8 +371,8 @@ QString MainWindow::monthtoInt(monat *m_data){
 }
 
 void MainWindow::dateString(Tagesdaten *data, monat *m_data){
-    QString monthInt = monthtoInt(m_data);
-    QString date = data->getTages_nr() + "." + monthInt + "." + m_data->getYear();
+    data->setMonthInt(monthtoInt(m_data));
+    QString date = data->getTages_nr() + "." + data->getMonthInt() + "." + m_data->getYear();
     data->setDate(date);
     //qDebug() << "datestring" << date;
 
@@ -395,6 +400,14 @@ void MainWindow::create_table(){
     }
 }
 
+void MainWindow::delete_month(Tagesdaten *data){
+    QSqlQuery query("IF EXISTS(SELECT date FROM zeitkonto WHERE strftime('%d-%m-%Y',"+data->getMonthInt()+"))"
+                    "DELETE id,day,date,office_time,flexible_time,summary FROM zeitkonto WHERE strftime('%d-%m-%Y',"+data->getMonthInt()+")");
+    if(!query.exec()){
+        qWarning() << "ERROR: Delete Table " << query.lastError();
+    }
+}
+
 void MainWindow::insert_table(Tagesdaten *data){
     // TO DO: Kürzel soll angepasst werden ("" = Office, "FA" = Flexible, "GLT" = Gleittag, "KRK" = Krank, "ABS" = Berufsschule, "F" = Feiertag)
     // Kann auch als Legende eingefügt werden oder durch Hover-Beschreibung
@@ -412,7 +425,6 @@ void MainWindow::insert_table(Tagesdaten *data){
 }
 
 void MainWindow::show_table(){
-    // TO DO: Table ausgabe im richtigen WIdget, momentan nur durch Konsole
     QString row ="";
     qint32 tablerow = 0;
     ui->datalist->setHorizontalHeaderLabels({"Day","Date","Type","Büro","Home","Sum"});//coloum names
@@ -431,7 +443,7 @@ void MainWindow::show_table(){
         QString sum = query.value(5).toString();
         row=  day + " " +  date + " " + type + " " + of + " " + fl + " " + sum;
         qDebug() << row;
-
+        //Datenbank ausgabe
         ui->datalist->setItem(tablerow,0, new QTableWidgetItem(day));
         ui->datalist->setItem(tablerow,1, new QTableWidgetItem(date));
         ui->datalist->setItem(tablerow,2, new QTableWidgetItem(type));
