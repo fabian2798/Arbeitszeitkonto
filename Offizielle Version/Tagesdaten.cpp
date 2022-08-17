@@ -591,3 +591,14 @@ void Tagesdaten::setFlexible_time_pause()
     office_time = of_h + "." + of_min;
     flexible_time = f_h + "." + f_min;
 }
+
+const QString &Tagesdaten::getDate() const
+{
+    return date;
+}
+
+void Tagesdaten::setDate(const QString &newDate)
+{
+    date = newDate;
+}
+

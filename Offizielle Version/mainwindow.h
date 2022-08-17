@@ -11,8 +11,13 @@
 #include <QTextStream>
 #include "Tagesdaten.h"
 #include "monat.h"
-#include "dbhandle.h"
 #include <QString>
+#include <QSqlDatabase>
+#include <QSqlDriver>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QString>
+#include <QSqlQueryModel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -37,9 +42,18 @@ private:
     QString Minutes_toString(qint32 zeit_Min);
     void toMinutesandHours(monat *m_data);
     QString get_monatsView(monat *m_data);
-    void fill_table(dbhandle *db_data, Tagesdaten *day_data, monat *m_data);
+    qint32 monthtoInt(monat *m_data);
+    void dateString(Tagesdaten *data, monat *m_data);
+
+    void create_table();
+    void insert_table(Tagesdaten *data);
+    void show_table();
+
+    QSqlDatabase db;
+
 private slots:
     void loadFile();
+    void drop_table();
 
 };
 

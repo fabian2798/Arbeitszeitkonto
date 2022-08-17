@@ -31,6 +31,13 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="droptable">
+        <property name="text">
+         <string>Drop Table</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -65,16 +72,40 @@
      </widget>
     </item>
     <item>
-     <widget class="QTableView" name="tableView">
+     <widget class="QTableWidget" name="datalist">
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
       </property>
-      <attribute name="horizontalHeaderHighlightSections">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderCascadingSectionResizes">
-       <bool>false</bool>
-      </attribute>
+      <column>
+       <property name="text">
+        <string>id</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>date</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>office</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>flexible</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>summary</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>
@@ -100,8 +131,8 @@
    <slot>loadFile()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>191</x>
-     <y>167</y>
+     <x>89</x>
+     <y>54</y>
     </hint>
     <hint type="destinationlabel">
      <x>298</x>
@@ -109,9 +140,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>droptable</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>drop_table()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>133</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>process_line(QString)</slot>
   <slot>loadFile()</slot>
+  <slot>drop_table()</slot>
  </slots>
 </ui>

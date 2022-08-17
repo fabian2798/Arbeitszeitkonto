@@ -98,6 +98,10 @@ public:
     const QString &getFlexible_time() const;
     void setFlexible_time_pause();
 
+
+    const QString &getDate() const;
+    void setDate(const QString &newDate);
+
 private:
     qint32 gesamte_tageszeit = 0;
     qint32 pausenzeit = 0;
@@ -127,6 +131,7 @@ private:
     QList <qint32> flexkommt;
     QList <qint32> flexgeht;
 
+    QString date;
     bool end_line = false;
     bool in_otherline = false;
 };
