@@ -10,14 +10,12 @@ CONFIG += c++17
 
 SOURCES += \
     Tagesdaten.cpp \
-    dbhandle.cpp \
     main.cpp \
     mainwindow.cpp \
     monat.cpp
 
 HEADERS += \
     Tagesdaten.h \
-    dbhandle.h \
     mainwindow.h \
     monat.h
 

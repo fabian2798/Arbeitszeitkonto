@@ -42,7 +42,7 @@ private:
     QString Minutes_toString(qint32 zeit_Min);
     void toMinutesandHours(monat *m_data);
     QString get_monatsView(monat *m_data);
-    qint32 monthtoInt(monat *m_data);
+    QString monthtoInt(monat *m_data);
     void dateString(Tagesdaten *data, monat *m_data);
 
     void create_table();

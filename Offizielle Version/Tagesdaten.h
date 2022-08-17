@@ -109,7 +109,7 @@ private:
     qint32 flexNetto_int = 0;
 
     QString tag;
-    QString tages_nr;
+    QString tages_nr = "0";
     QString arb_art;
 
     //endteil

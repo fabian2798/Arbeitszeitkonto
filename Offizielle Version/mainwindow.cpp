@@ -67,7 +67,7 @@ void MainWindow::loadFile()
     Tagesdaten day_data = Tagesdaten(); //Konstructor
     monat monats_data = monat();
 
-    //db_data.drop_table();
+    //drop_table();
     create_table();
 
     while (!in.atEnd()) {
@@ -141,7 +141,7 @@ void MainWindow::loadFile()
        }
        }
     //Show DB
-    qDebug() << "Order: ID, Date, Kürzel, Office_time, Flexible_time, summary";
+    qDebug() << "Order: ID, Day, Date, Kürzel, Office_time, Flexible_time, summary";
     show_table();
 
 
@@ -199,7 +199,7 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten *data, monat *m_data){
         data->setTag(day);
         }
 
-        day_nr = "1";
+        day_nr = "01";
         data->setTages_nr(day_nr);
         uebertrag = match1.captured(2);
         qDebug()<<day<<day_nr<<uebertrag;
@@ -324,51 +324,50 @@ void MainWindow::toMinutesandHours(monat *m_data){
     m_data->setGes_fnt(ges_fnt);
 }
 
-qint32 MainWindow::monthtoInt(monat *m_data){
-    qint32 monthInt = 0;
+QString MainWindow::monthtoInt(monat *m_data){
+    QString monthstr = "0";
     if(m_data->getMonth().compare("Januar") == 0){
-        monthInt = 1;
+        monthstr = "01";
     }
     if(m_data->getMonth().compare("Februar") == 0){
-        monthInt = 2;
+        monthstr = "02";
     }
     if(m_data->getMonth().compare("März") == 0){
-        monthInt = 3;
+        monthstr = "03";
     }
     if(m_data->getMonth().compare("April") == 0){
-        monthInt = 4;
+        monthstr = "04";
     }
     if(m_data->getMonth().compare("Mai") == 0){
-        monthInt = 5;
+        monthstr = "05";
     }
     if(m_data->getMonth().compare("Juni") == 0){
-        monthInt = 6;
+        monthstr = "06";
     }
     if(m_data->getMonth().compare("Juli") == 0){
-        monthInt = 7;
+        monthstr = "07";
     }
     if(m_data->getMonth().compare("August") == 0){
-        monthInt = 8;
+        monthstr= "08";
     }
     if(m_data->getMonth().compare("September") == 0){
-        monthInt = 9;
+        monthstr = "09";
     }
     if(m_data->getMonth().compare("Oktober") == 0){
-        monthInt = 10;
+        monthstr = "10";
     }
     if(m_data->getMonth().compare("November") == 0){
-        monthInt = 11;
+        monthstr = "11";
     }
     if(m_data->getMonth().compare("Dezember") == 0){
-        monthInt = 12;
+        monthstr = "12";
     }
-    return monthInt;
+    return monthstr;
 }
 
 void MainWindow::dateString(Tagesdaten *data, monat *m_data){
-    qint32 monthInt = monthtoInt(m_data);
-    QString mInt = QString::number(monthInt);
-    QString date = data->getTag() + " " + data->getTages_nr() + "." + mInt + "." + m_data->getYear();
+    QString monthInt = monthtoInt(m_data);
+    QString date = data->getTages_nr() + "." + monthInt + "." + m_data->getYear();
     data->setDate(date);
     //qDebug() << "datestring" << date;
 
@@ -384,6 +383,7 @@ void MainWindow::drop_table(){
 void MainWindow::create_table(){
     QSqlQuery query("CREATE TABLE IF NOT EXISTS zeitkonto("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "day TEXT NOT NULL,"
                     "date TEXT NOT NULL,"
                     "type TEXT NULL,"
                     "office_time TEXT NULL,"
@@ -399,9 +399,10 @@ void MainWindow::insert_table(Tagesdaten *data){
     // TO DO: Kürzel soll angepasst werden ("" = Office, "FA" = Flexible, "GLT" = Gleittag, "KRK" = Krank, "ABS" = Berufsschule, "F" = Feiertag)
     // Kann auch als Legende eingefügt werden oder durch Hover-Beschreibung
     QSqlQuery query;
-        query.prepare("INSERT INTO [zeitkonto](date, type, office_time, flexible_time, summary) VALUES(:date, :type, :office_time, :flexible_time, :summary);");
+        query.prepare("INSERT INTO [zeitkonto](day, date, type, office_time, flexible_time, summary) VALUES(:day, :date, :type, :office_time, :flexible_time, :summary);");
+        query.bindValue(":day", data->getTag());
         query.bindValue(":date", data->getDate());
-        query.bindValue(":type",data->getArb_art());
+        query.bindValue(":type", data->getArb_art());
         query.bindValue(":office_time", data->getOffice_time());
         query.bindValue(":flexible_time", data->getFlexible_time());
         query.bindValue(":summary", data->getNetto_zeit());//Netto Arbeitszeit am Tag
@@ -413,19 +414,30 @@ void MainWindow::insert_table(Tagesdaten *data){
 void MainWindow::show_table(){
     // TO DO: Table ausgabe im richtigen WIdget, momentan nur durch Konsole
     QString row ="";
-    QSqlQuery query("SELECT * FROM zeitkonto");
+    qint32 tablerow = 0;
+    ui->datalist->setHorizontalHeaderLabels({"Day","Date","Type","Büro","Home","Sum"});//coloum names
+    ui->datalist->setRowCount(50);//Maximal angezeigte Zeilen
+    ui->datalist->setColumnCount(6);
+    QSqlQuery query("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
     if(!query.exec()){
         qWarning() << "ERROR: Show Table" << query.lastError();
     }
     while(query.next()){
-        QString id = query.value(0).toString();
+        QString day = query.value(0).toString();
         QString date = query.value(1).toString();
         QString type = query.value(2).toString();
         QString of = query.value(3).toString();
         QString fl = query.value(4).toString();
         QString sum = query.value(5).toString();
-
-        row=  id + " " + date + " " + type + " " + of + " " + fl + " " + sum;
+        row=  day + " " +  date + " " + type + " " + of + " " + fl + " " + sum;
         qDebug() << row;
+
+        ui->datalist->setItem(tablerow,0, new QTableWidgetItem(day));
+        ui->datalist->setItem(tablerow,1, new QTableWidgetItem(date));
+        ui->datalist->setItem(tablerow,2, new QTableWidgetItem(type));
+        ui->datalist->setItem(tablerow,3, new QTableWidgetItem(of));
+        ui->datalist->setItem(tablerow,4, new QTableWidgetItem(fl));
+        ui->datalist->setItem(tablerow,5, new QTableWidgetItem(sum));
+        tablerow += 1;
     }
 }

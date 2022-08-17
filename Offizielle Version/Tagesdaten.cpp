@@ -17,7 +17,12 @@ const QString &Tagesdaten::getTages_nr() const
 
 void Tagesdaten::setTages_nr(const QString &newTages_nr)
 {
-    this->tages_nr = newTages_nr;
+    if(newTages_nr.toInt() < 10){
+    this->tages_nr = "0" + newTages_nr;
+    }
+    else{
+        this->tages_nr = newTages_nr;
+    }
 }
 
 const QString &Tagesdaten::getArb_art() const

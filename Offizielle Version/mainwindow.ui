@@ -78,7 +78,7 @@
       </property>
       <column>
        <property name="text">
-        <string>id</string>
+        <string>day</string>
        </property>
       </column>
       <column>
