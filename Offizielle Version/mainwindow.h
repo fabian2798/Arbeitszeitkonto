@@ -22,6 +22,7 @@
 #include <QString>
 #include <QSqlQueryModel>
 
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -35,6 +36,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    int valuesOfChart[2]; // [0] = Office, [1] = HomeOffice
 
 private:
     Ui::MainWindow *ui;
@@ -47,12 +49,18 @@ private:
     QString get_monatsView(monat *m_data);
     QString monthtoInt(monat *m_data);
     void dateString(Tagesdaten *data, monat *m_data);
+    void getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey);
 
     void create_table();
     void insert_table(Tagesdaten *data);
     void show_table();
+<<<<<<< HEAD
     void update_day(Tagesdaten *data);
 
+=======
+    void fillComboBoxesFromDB();
+    void delete_month(Tagesdaten *data);
+>>>>>>> d6fb62e601054c8ed6a7af69866b31fff25e3df9
 
     QSqlDatabase db;
 
@@ -61,6 +69,8 @@ private slots:
     void on_loadFile_clicked();
     void on_pushButton_options_clicked();
     void on_pushButton_help_clicked();
+    void on_pushButton_clicked();
+    void on_pushButton_stats_update_clicked();
 };
 
 #endif // MAINWINDOW_H
