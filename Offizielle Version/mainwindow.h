@@ -54,13 +54,11 @@ private:
     void create_table();
     void insert_table(Tagesdaten *data);
     void show_table();
-<<<<<<< HEAD
+
     void update_day(Tagesdaten *data);
 
-=======
     void fillComboBoxesFromDB();
     void delete_month(Tagesdaten *data);
->>>>>>> d6fb62e601054c8ed6a7af69866b31fff25e3df9
 
     QSqlDatabase db;
 

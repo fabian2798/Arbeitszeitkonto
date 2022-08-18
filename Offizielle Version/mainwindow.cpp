@@ -248,12 +248,13 @@ QString MainWindow::monthtoInt(monat * m_data) {
     return monthstr;
 }
 
-<<<<<<< HEAD
+
 void MainWindow::dateString(Tagesdaten *data, monat *m_data){
     data->setMonthInt(monthtoInt(m_data));
     QString date = m_data->getYear()+"-"+data->getMonthInt()+"-"+data->getTages_nr();
-    data->setDate(date);
-=======
+    data->setDate(date);}
+
+
 QString IntToMonth(int month) {
     QString monthstr = "0";
     if (month == 1) {
@@ -295,15 +296,7 @@ QString IntToMonth(int month) {
     return monthstr;
 }
 
-void MainWindow::dateString(Tagesdaten * data, monat * m_data) {
-    QString monthInt = monthtoInt(m_data);
-    QString date = m_data -> getYear() + "-" + monthInt + +"-" + data -> getTages_nr();
 
-    data -> setDate(date);
->>>>>>> d6fb62e601054c8ed6a7af69866b31fff25e3df9
-    //qDebug() << "datestring" << date;
-
-}
 
 void MainWindow::drop_table() {
     QSqlQuery query("DROP TABLE zeitkonto");
@@ -327,7 +320,7 @@ void MainWindow::create_table() {
     }
 }
 
-<<<<<<< HEAD
+
 //Aktualisiert jeden Tag
 //IDEE: Falls zwei verschiedene Journale des gleichen Monats geladen werden, werden alle Tage des Monats geupdatet
 void MainWindow::update_day(Tagesdaten *data){
@@ -338,12 +331,7 @@ void MainWindow::update_day(Tagesdaten *data){
                           "summary = '%3' "
                           "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time()).arg(data->getFlexible_time()).arg(data->getNetto_zeit()).arg(data->getDate()));
     if(!query.exec()){
-=======
-void MainWindow::delete_month(Tagesdaten * data) {
-    QSqlQuery query("IF EXISTS(SELECT date FROM zeitkonto WHERE strftime('%d-%m-%Y'," + data -> getMonthInt() + "))"
-        "DELETE id,day,date,office_time,flexible_time,summary FROM zeitkonto WHERE strftime('%d-%m-%Y'," + data -> getMonthInt() + ")");
-    if (!query.exec()) {
->>>>>>> d6fb62e601054c8ed6a7af69866b31fff25e3df9
+
         qWarning() << "ERROR: Delete Table " << query.lastError();
     }
     qDebug() << query.lastQuery();
@@ -404,14 +392,8 @@ void MainWindow::show_table() {
     }
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-void MainWindow::on_pushButton_options_clicked()
-{
-=======
 void MainWindow::on_pushButton_options_clicked() {
->>>>>>> d6fb62e601054c8ed6a7af69866b31fff25e3df9
     OptionsWindow * OW = new OptionsWindow();
     OW -> setModal(true);
     OW -> exec();
@@ -587,10 +569,7 @@ int db_timeToInt(QString string) {
     return minutes;
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> feature/db
-=======
+
 void MainWindow::getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey) {
 
     QListWidget * p = ui -> frame_stats_distribution -> findChild < QListWidget * > ();
@@ -711,4 +690,4 @@ void MainWindow::on_pushButton_stats_update_clicked() {
     ui -> frame_stats_distribution -> layout() -> addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
 
 }
->>>>>>> d6fb62e601054c8ed6a7af69866b31fff25e3df9
+
