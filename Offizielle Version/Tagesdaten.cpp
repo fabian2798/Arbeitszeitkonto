@@ -560,6 +560,7 @@ const QString &Tagesdaten::getOffice_time() const
 
 void Tagesdaten::setOffice_time_pause()
 {
+    //qDebug() << "office";
     netto_int = netto_int - pausenzeit;
 
     qint32 officetime_min = netto_int % 60;
@@ -570,6 +571,12 @@ void Tagesdaten::setOffice_time_pause()
     qint32 flextime_h = flexNetto_int / 60;
     QString f_min = QString::number(flextime_min);
     QString f_h = QString::number(flextime_h);
+    if(officetime_min < 10){
+        of_min = "0"+QString::number(officetime_min);
+    }
+    if(flextime_min < 10){
+        f_min = "0"+QString::number(flextime_min);
+    }
 
     office_time = of_h + "." + of_min;
     flexible_time = f_h + "." + f_min;
@@ -582,17 +589,24 @@ const QString &Tagesdaten::getFlexible_time() const
 
 void Tagesdaten::setFlexible_time_pause()
 {
+    //qDebug() << "flex";
     flexNetto_int = flexNetto_int - pausenzeit;
 
     qint32 flextime_min = flexNetto_int % 60;
     qint32 flextime_h = flexNetto_int / 60;
-    QString f_min = QString::number(flextime_min);
-    QString f_h = QString::number(flextime_h);
     qint32 officetime_min = netto_int % 60;
     qint32 officetime_h = netto_int / 60;
-    QString of_min = QString::number(officetime_min);
+    QString f_h = QString::number(flextime_h);
     QString of_h = QString::number(officetime_h);
+    QString f_min = QString::number(flextime_min);
+    QString of_min = QString::number(officetime_min);
 
+    if(officetime_min < 10){
+        of_min = "0"+QString::number(officetime_min);
+    }
+    if(flextime_min < 10){
+        f_min = "0"+QString::number(flextime_min);
+    }
     office_time = of_h + "." + of_min;
     flexible_time = f_h + "." + f_min;
 }
@@ -607,3 +621,17 @@ void Tagesdaten::setDate(const QString &newDate)
     date = newDate;
 }
 
+const QString &Tagesdaten::getMonthInt() const
+{
+    return monthInt;
+}
+
+void Tagesdaten::setMonthInt(const QString &newMonthInt)
+{
+    monthInt = newMonthInt;
+}
+
+void Tagesdaten::setDaytimesZero(){
+    office_time = "0.00";
+    flexible_time = "0.00";
+}

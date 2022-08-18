@@ -54,6 +54,7 @@ private:
     void insert_table(Tagesdaten *data);
     void show_table();
     void fillComboBoxesFromDB();
+    void delete_month(Tagesdaten *data);
 
     QSqlDatabase db;
 
