@@ -137,7 +137,7 @@ void MainWindow::loadFile()
            insert_table(&day_data);
 
 
-           delete_month(&day_data); //Wenn der gleiche Monat eingelesen wird, soll gespeicherten Monat löschen
+           update_day(&day_data); //Wenn der gleiche Monat eingelesen wird, soll gespeicherten Monat löschen
 
            monats_data.setGesamt(day_data.getGesamte_tageszeit());// Add Tagesgesamt
 
@@ -401,18 +401,16 @@ void MainWindow::create_table(){
         qWarning() << "ERROR: Create Table " << query.lastError();
     }
 }
-//Falls gleicher Monat mehrfach eingelesen wird, updaten die Daten
-void MainWindow::delete_month(Tagesdaten *data){
+
+//Aktualisiert jeden Tag
+//IDEE: Falls zwei verschiedene Journale des gleichen Monats geladen werden, werden alle Tage des Monats geupdatet
+void MainWindow::update_day(Tagesdaten *data){
     QSqlQuery query;
     query.prepare(QString("UPDATE [zeitkonto] "
                           "SET office_time = '%1', "
                           "flexible_time = '%2', "
                           "summary = '%3' "
                           "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time()).arg(data->getFlexible_time()).arg(data->getNetto_zeit()).arg(data->getDate()));
-//    query.bindValue(":office_time",data->getOffice_time());
-//    query.bindValue(":flexible_time",data->getFlexible_time());
-//    query.bindValue(":summary",data->getNetto_zeit());
-//    query.bindValue(":monthIntyear",data->getDate());
     if(!query.exec()){
         qWarning() << "ERROR: Delete Table " << query.lastError();
     }

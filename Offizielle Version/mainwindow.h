@@ -48,9 +48,7 @@ private:
     void create_table();
     void insert_table(Tagesdaten *data);
     void show_table();
-    void delete_month(Tagesdaten *data);
-
-    void updateones();
+    void update_day(Tagesdaten *data);
 
 
     QSqlDatabase db;
