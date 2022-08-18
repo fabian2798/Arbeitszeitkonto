@@ -7,10 +7,21 @@ ChartBuilder::ChartBuilder()
 
 // creates a Pie Chart for the Distrubtion between Office and Home Office work time
 QChartView * ChartBuilder::createDistributionChart(int office, int homeoffice){
+
     int sum = office + homeoffice;
     QPieSeries *series = new QPieSeries();
+    if(homeoffice == 0 or office == 0 ){
+        series->append("Büro",  50);
+        series->append("Home Office",  50);
+        QMessageBox * info = new QMessageBox();
+        info->setText("Keine Daten verfügbar.");
+        info->setWindowTitle("Fehler!");
+        info->open();
+    }
+    else{
     series->append("Büro",  double(office)/double(sum) * 100);
     series->append("Home Office",  double(homeoffice)/double(sum) * 100);
+    }
     QPieSlice *sliceO = series->slices().at(0);
     QPieSlice *sliceHO = series->slices().at(1);
     sliceO->setLabelVisible();

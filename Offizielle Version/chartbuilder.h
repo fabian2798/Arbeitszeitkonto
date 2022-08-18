@@ -9,6 +9,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QChart>
 #include <QtCharts/QLegendMarker>
+#include <QMessageBox>
 
 class ChartBuilder
 {
