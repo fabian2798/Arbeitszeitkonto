@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 //TO DO: UI-Design verbessern (z.B Statusbar einfügen -> File öffnen,Datenbank öffnen)->Marten
-//TO DO: Arbeitszeiten können nur zwischen und 6 und 19 Uhr eingelesen werden -> Benötige Absegnung über Vorgang
+//TO DO: Arbeitszeiten können nur zwischen und 6 und 19 Uhr eingelesen werden -> Bestätigung des Vorganges wird noch benötigt
 //TO DO: Mögliche Umstrukturierung der Pausenzeit - & Arbeitszeitalgortihmen -> geringe Priorität
 //TO DO: Überstunden werden noch nicht anders gewertet, zählen bisher einfach in die normale Arbeitszeit hinein -> Frage: Ob Überstunden mit in %-Anzahl einbezogen werden soll
 //TO DO: Tagesübersichtszeile anpassen (klare Darstellung)->Marten
@@ -242,7 +242,7 @@ QString MainWindow::monthtoInt(monat *m_data){
 
 void MainWindow::dateString(Tagesdaten *data, monat *m_data){
     data->setMonthInt(monthtoInt(m_data));
-    QString date = data->getTages_nr() + "." + data->getMonthInt() + "." + m_data->getYear();
+    QString date = m_data->getYear()+"-"+data->getMonthInt()+"-"+data->getTages_nr();
     data->setDate(date);
     //qDebug() << "datestring" << date;
 
@@ -270,12 +270,19 @@ void MainWindow::create_table(){
     }
 }
 
-void MainWindow::delete_month(Tagesdaten *data){
-    QSqlQuery query("IF EXISTS(SELECT date FROM zeitkonto WHERE strftime('%d-%m-%Y',"+data->getMonthInt()+"))"
-                    "DELETE id,day,date,office_time,flexible_time,summary FROM zeitkonto WHERE strftime('%d-%m-%Y',"+data->getMonthInt()+")");
+//Aktualisiert jeden Tag
+//IDEE: Falls zwei verschiedene Journale des gleichen Monats geladen werden, werden alle Tage des Monats geupdatet
+void MainWindow::update_day(Tagesdaten *data){
+    QSqlQuery query;
+    query.prepare(QString("UPDATE [zeitkonto] "
+                          "SET office_time = '%1', "
+                          "flexible_time = '%2', "
+                          "summary = '%3' "
+                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time()).arg(data->getFlexible_time()).arg(data->getNetto_zeit()).arg(data->getDate()));
     if(!query.exec()){
         qWarning() << "ERROR: Delete Table " << query.lastError();
     }
+    qDebug() << query.lastQuery();
 }
 
 void MainWindow::insert_table(Tagesdaten *data){
@@ -324,6 +331,7 @@ void MainWindow::show_table(){
     }
 }
 
+<<<<<<< HEAD
 
 void MainWindow::on_pushButton_options_clicked()
 {
@@ -463,3 +471,5 @@ void MainWindow::on_loadFile_clicked()
     ui->lastFileLoaded->insertItem(1,fileName);
 }
 
+=======
+>>>>>>> feature/db
