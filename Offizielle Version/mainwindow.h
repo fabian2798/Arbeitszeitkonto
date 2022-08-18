@@ -35,6 +35,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    int valuesOfChart[2]; // [0] = Office, [1] = HomeOffice
 
 private:
     Ui::MainWindow *ui;
@@ -47,10 +48,12 @@ private:
     QString get_monatsView(monat *m_data);
     QString monthtoInt(monat *m_data);
     void dateString(Tagesdaten *data, monat *m_data);
+    void getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey);
 
     void create_table();
     void insert_table(Tagesdaten *data);
     void show_table();
+    void fillComboBoxesFromDB();
 
     QSqlDatabase db;
 
@@ -59,6 +62,8 @@ private slots:
     void on_loadFile_clicked();
     void on_pushButton_options_clicked();
     void on_pushButton_help_clicked();
+    void on_pushButton_clicked();
+    void on_pushButton_stats_update_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -13,7 +13,6 @@ MainWindow::MainWindow(QWidget *parent) // Konstructor
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
     const QString DRIVER ("QSQLITE");
     if(QSqlDatabase::isDriverAvailable(DRIVER)){
         db = QSqlDatabase::addDatabase(DRIVER);
@@ -22,7 +21,19 @@ MainWindow::MainWindow(QWidget *parent) // Konstructor
             qWarning() << "ERROR: Connection " << db.lastError();
         }
     }
+
+    show_table();
+    fillComboBoxesFromDB();
     ui->frame_stats_distribution->setLayout(ChartBuilder::createStatWidget());
+    // geht noch nicht mit verschiedenen Startjahren
+    QString currentMonth = QString::number(QDate::currentDate().month());
+    QString beginMonth = QString::number(QDate::currentDate().month() - 2);
+    QString currentYear = QString::number(QDate::currentDate().year());
+    getDistribution(&valuesOfChart[0], &valuesOfChart[1], beginMonth , currentYear, currentMonth, currentYear);
+       // neues Pie Chart wird erstellt, altes gelöscht
+       QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
+       delete deleted;
+       ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
     QMainWindow::showMaximized();
 }
 
@@ -242,9 +253,51 @@ QString MainWindow::monthtoInt(monat *m_data){
     return monthstr;
 }
 
+QString IntToMonth(int month){
+    QString monthstr = "0";
+    if(month == 1){
+        monthstr = "Januar";
+    }
+    if(month == 2){
+        monthstr = "Februar";
+    }
+    if(month == 3){
+        monthstr = "März";
+    }
+    if(month == 4){
+        monthstr = "April";
+    }
+    if(month == 5){
+        monthstr = "Mai";
+    }
+    if(month == 6){
+        monthstr = "Juni";
+    }
+    if(month == 7){
+        monthstr = "Juli";
+    }
+    if(month == 8){
+        monthstr= "August";
+    }
+    if(month == 9){
+        monthstr = "September";
+    }
+    if(month == 10){
+        monthstr = "Oktober";
+    }
+    if(month == 11){
+        monthstr = "November";
+    }
+    if(month == 12){
+        monthstr = "Dezember";
+    }
+    return monthstr;
+}
+
+
 void MainWindow::dateString(Tagesdaten *data, monat *m_data){
     QString monthInt = monthtoInt(m_data);
-    QString date = data->getTages_nr() + "." + monthInt + "." + m_data->getYear();
+    QString date =  m_data->getYear() + "-" + monthInt + + "-" + data->getTages_nr();
     data->setDate(date);
     //qDebug() << "datestring" << date;
 
@@ -283,9 +336,11 @@ void MainWindow::insert_table(Tagesdaten *data){
         query.bindValue(":office_time", data->getOffice_time());
         query.bindValue(":flexible_time", data->getFlexible_time());
         query.bindValue(":summary", data->getNetto_zeit());//Netto Arbeitszeit am Tag
+        db.commit();
         if(!query.exec()){
             qWarning() << "ERROR: Insert Table " << query.lastError();
         }
+
 }
 
 void MainWindow::show_table(){
@@ -457,4 +512,156 @@ void MainWindow::on_loadFile_clicked()
     file.close();
     ui->lastFileLoaded->insertItem(1,fileName);
 }
+
+void MainWindow::fillComboBoxesFromDB(){
+    QString queryString = "SELECT DISTINCT strftime('%Y', date) from zeitkonto;";
+    QSqlQuery distinctYearSearch(queryString);
+    if(!distinctYearSearch.exec()){
+        qWarning() << "ERROR: Show Table" << distinctYearSearch.lastError();
+    }
+    while(distinctYearSearch.next()){
+        qDebug() << distinctYearSearch.value(0).toString();
+        qDebug() << "Hallo";
+        ui->comboBox_begin_year->addItem(distinctYearSearch.value(0).toString());
+        ui->comboBox_end_year->addItem(distinctYearSearch.value(0).toString());
+    }
+
+    ui->comboBox_end_month->setCurrentIndex(QDate::currentDate().month()-1);
+    if(QDate::currentDate().month()-1 < 2){
+            ui->comboBox_begin_month->setCurrentIndex(12 - QDate::currentDate().month()-1);
+    }
+    else{
+        ui->comboBox_begin_month->setCurrentIndex(QDate::currentDate().month()-3);
+
+    }
+}
+
+// Button zum Testen von Funktionen
+void MainWindow::on_pushButton_clicked()
+{
+    //fillComboBoxesFromDB();
+}
+
+
+int db_timeToInt(QString string){
+    int minutes = 0;
+    QString pattern_int(R"(^([0-9]+)[.]([0-9]+)$)");
+    static QRegularExpression re0(pattern_int);
+    QRegularExpressionMatch match0 = re0.match(string);
+    QString hours_s, minutes_s;
+    if (match0.hasMatch()) {
+        hours_s = match0.captured(1);
+        minutes_s = match0.captured(2);
+    }
+    minutes = hours_s.toInt() * 60 + minutes_s.toInt();
+    //qDebug() << hours_s;
+    //qDebug() << minutes_s;
+
+
+    return minutes;
+}
+
+void MainWindow::getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey){
+
+     QListWidget * p = ui->frame_stats_distribution->findChild<QListWidget*>();
+     p->clear();
+    QString begin_month = bm;
+    QString end_month = em;
+    QString begin_year = by;
+    QString end_year = ey;
+    int summen[2];
+
+    // falls im gleichem Jahr
+    if (begin_year == end_year){
+        if (begin_month == end_month){
+            if(begin_month.toInt() < 10){
+                begin_month = "0" + begin_month;
+                }
+
+            QString selectString = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) = '" + begin_month + "';";
+            QSqlQuery q(selectString);
+            qDebug() << begin_month << " " << end_month << " " << selectString;
+            int summen[2];
+            summen[0] = 0; // Office Summe
+            summen[1] = 0; // Home Office Summe
+            if(!q.isActive()){
+                qWarning() << "ERROR: Create Table " << q.lastError();
+            }
+            while(q.next()){
+                qDebug() << q.value(0).toString() << " " << q.value(1).toString() << " " << q.value(2).toString();
+                summen[0] += db_timeToInt(q.value(1).toString());
+                summen[1] += db_timeToInt(q.value(2).toString());
+            }
+            *test1 = summen[0];
+            *test2 = summen[1];
+        }
+        else{
+        // Zahlenreihe der Monate bilden
+        QStringList * test = new QStringList();
+        int i;
+        for(i = begin_month.toInt(); i < end_month.toInt() + 1 ; i++ ){
+            if(i<10){
+                test->append("0" + QString::number(i));
+            }
+            else{
+                test->append(QString::number(i));
+            }
+            QListWidget * p = ui->frame_stats_distribution->findChild<QListWidget*>();
+
+            p->addItem(IntToMonth(i));
+        }
+
+        QString selectString = "SELECT date, office_time, flexible_time from zeitkonto ";
+
+
+        for ( QString x : *test){
+            if(x == test->last()){
+            selectString += "strftime('%m', date) ='" + x + "' OR strftime('%y', date) = '" + begin_year + "'";
+            }
+
+            else if(x == test->first()){
+                selectString += "WHERE strftime('%m', date) ='" + x + "' OR ";
+            }
+
+            else{
+                selectString += " strftime('%m', date) ='" + x + "' OR ";
+            }
+        }
+       selectString += ";";
+
+       qDebug() << selectString;
+       QSqlQuery q(selectString);
+
+       summen[0] = 0; // Office Summe
+       summen[1] = 0; // Home Office Summe
+       if(!q.isActive()){
+           qWarning() << "ERROR: Create Table " << q.lastError();
+       }
+       while(q.next()){
+           qDebug() << q.value(0).toString() << " " << q.value(1).toString() << " " << q.value(2).toString();
+           summen[0] += db_timeToInt(q.value(1).toString());
+           summen[1] += db_timeToInt(q.value(2).toString());
+       }
+       *test1 = summen[0];
+       *test2 = summen[1];
+       }
+
+}
+}
+
+void MainWindow::on_pushButton_stats_update_clicked(){
+
+    // wenn der gleiche Start und Endmonat eingegeben wird stürzt das Programm ab --> fixen
+
+    QString begin_month = QString::number(ui->comboBox_begin_month->currentIndex() + 1);
+    QString end_month = QString::number(ui->comboBox_end_month->currentIndex() + 1);
+    QString begin_year = ui->comboBox_begin_year->currentText();
+    QString end_year = ui->comboBox_end_year->currentText();
+
+    getDistribution(&valuesOfChart[0], &valuesOfChart[1], begin_month, begin_year, end_month, end_year);
+       // neues Pie Chart wird erstellt, altes gelöscht
+       QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
+       delete deleted;
+       ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
+    }
 

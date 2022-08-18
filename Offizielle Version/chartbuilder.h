@@ -16,6 +16,7 @@ public:
     ChartBuilder();
     static QChartView * createDistributionChart(int office, int homeoffice);
     static QHBoxLayout * createStatWidget();
+    static void getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey);
 };
 
 #endif // CHARTBUILDER_H

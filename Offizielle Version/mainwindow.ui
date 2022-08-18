@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -40,7 +40,68 @@
               <widget class="QComboBox" name="comboBox_begin_year"/>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_begin_month"/>
+              <widget class="QComboBox" name="comboBox_begin_month">
+               <item>
+                <property name="text">
+                 <string>Januar</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Februar</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>März</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>April</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Mai</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Juni</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Juli</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>August</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>September</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Oktober</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>November</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Dezember</string>
+                </property>
+               </item>
+              </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_bis">
@@ -56,7 +117,68 @@
               <widget class="QComboBox" name="comboBox_end_year"/>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_end_month"/>
+              <widget class="QComboBox" name="comboBox_end_month">
+               <item>
+                <property name="text">
+                 <string>Januar</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Februar</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>März</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>April</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Mai</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Juni</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Juli</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>August</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>September</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Oktober</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>November</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Dezember</string>
+                </property>
+               </item>
+              </widget>
              </item>
              <item>
               <spacer name="horizontalSpacer_2">
@@ -117,6 +239,12 @@
              <string notr="true">border-color:black;
 border-width:2px;</string>
             </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="dragDropOverwriteMode">
+             <bool>false</bool>
+            </property>
             <column>
              <property name="text">
               <string>day</string>
@@ -170,6 +298,48 @@ border-width:2px;</string>
            </size>
           </property>
          </spacer>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton_options">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Optionen</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Maximum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>600</width>
+            <height>50</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="pushButton_help">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Hilfe</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="1">
          <widget class="QFrame" name="frame">
@@ -240,47 +410,12 @@ border-width:2px;</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="pushButton_help">
-          <property name="maximumSize">
-           <size>
-            <width>200</width>
-            <height>16777215</height>
-           </size>
-          </property>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="pushButton">
           <property name="text">
-           <string>Hilfe</string>
+           <string>testbutton</string>
           </property>
          </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="pushButton_options">
-          <property name="maximumSize">
-           <size>
-            <width>200</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Optionen</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Maximum</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>600</width>
-            <height>50</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>
