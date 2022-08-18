@@ -28,11 +28,11 @@ MainWindow::MainWindow(QWidget *parent) // Konstructor
     QString currentMonth = QString::number(QDate::currentDate().month());
     QString beginMonth = QString::number(QDate::currentDate().month() - 2);
     QString currentYear = QString::number(QDate::currentDate().year());
-    getDistribution(&valuesOfChart[0], &valuesOfChart[1], beginMonth , currentYear, currentMonth, currentYear);
+    //getDistribution(&valuesOfChart[0], &valuesOfChart[1], beginMonth , currentYear, currentMonth, currentYear);
        // neues Pie Chart wird erstellt, altes gelöscht
-       QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
-       delete deleted;
-       ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
+       //QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
+       //delete deleted;
+       //ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
     QMainWindow::showMaximized();
 }
 
@@ -510,10 +510,6 @@ void MainWindow::on_loadFile_clicked()
     //Monatsübersicht
     toMinutesandHours(&monats_data); // (Int) Minuten to (String) Hour.Minuten
     mView = get_monatsView(&monats_data); // Return Übersichtsstring des Monats
-    QListWidget * month_list = ui->frame_stats_distribution->findChild<QListWidget *>();
-
-    month_list->addItem(mView);
-
 
     file.close();
     ui->lastFileLoaded->insertItem(1,fileName);
