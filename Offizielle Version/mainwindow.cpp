@@ -2,11 +2,10 @@
 #include "ui_mainwindow.h"
 
 //TO DO: UI-Design verbessern (z.B Statusbar einfügen -> File öffnen,Datenbank öffnen)->Marten
-//TO DO: Arbeitszeiten können nur zwischen und 6 und 19 Uhr eingelesen werden -> Benötige Absegnung über Vorgang
+//TO DO: Arbeitszeiten können nur zwischen und 6 und 19 Uhr eingelesen werden -> Bestätigung des Vorganges wird noch benötigt
 //TO DO: Mögliche Umstrukturierung der Pausenzeit - & Arbeitszeitalgortihmen -> geringe Priorität
 //TO DO: Überstunden werden noch nicht anders gewertet, zählen bisher einfach in die normale Arbeitszeit hinein -> Frage: Ob Überstunden mit in %-Anzahl einbezogen werden soll
 //TO DO: Tagesübersichtszeile anpassen (klare Darstellung)->Marten
-//TO DO: Monate bei meherigen Auseinlesen aktualisieren
 
 MainWindow::MainWindow(QWidget *parent) // Konstructor
     : QMainWindow(parent)
@@ -67,9 +66,8 @@ void MainWindow::loadFile()
     Tagesdaten day_data = Tagesdaten(); //Konstructor
     monat monats_data = monat();
 
-    drop_table();
+    //drop_table();
     create_table();
-    delete_month(&day_data); //Wenn der gleiche Monat eingelesen wird, soll gespeicherten Monat löschen
 
     while (!in.atEnd()) {
        QString line = in.readLine();
@@ -139,15 +137,19 @@ void MainWindow::loadFile()
            insert_table(&day_data);
 
 
+           delete_month(&day_data); //Wenn der gleiche Monat eingelesen wird, soll gespeicherten Monat löschen
+
            monats_data.setGesamt(day_data.getGesamte_tageszeit());// Add Tagesgesamt
 
            //Abschluss
            day_data.clearAllTimes(); //QList.clear()
        }
        }
+
     //Show DB
     qDebug() << "Order: ID, Day, Date, Kürzel, Office_time, Flexible_time, summary";
     show_table();
+
 
 
     //Monatsübersicht
@@ -372,7 +374,7 @@ QString MainWindow::monthtoInt(monat *m_data){
 
 void MainWindow::dateString(Tagesdaten *data, monat *m_data){
     data->setMonthInt(monthtoInt(m_data));
-    QString date = data->getTages_nr() + "." + data->getMonthInt() + "." + m_data->getYear();
+    QString date = m_data->getYear()+"-"+data->getMonthInt()+"-"+data->getTages_nr();
     data->setDate(date);
     //qDebug() << "datestring" << date;
 
@@ -399,13 +401,22 @@ void MainWindow::create_table(){
         qWarning() << "ERROR: Create Table " << query.lastError();
     }
 }
-
+//Falls gleicher Monat mehrfach eingelesen wird, updaten die Daten
 void MainWindow::delete_month(Tagesdaten *data){
-    QSqlQuery query("IF EXISTS(SELECT date FROM zeitkonto WHERE strftime('%d-%m-%Y',"+data->getMonthInt()+"))"
-                    "DELETE id,day,date,office_time,flexible_time,summary FROM zeitkonto WHERE strftime('%d-%m-%Y',"+data->getMonthInt()+")");
+    QSqlQuery query;
+    query.prepare(QString("UPDATE [zeitkonto] "
+                          "SET office_time = '%1', "
+                          "flexible_time = '%2', "
+                          "summary = '%3' "
+                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time()).arg(data->getFlexible_time()).arg(data->getNetto_zeit()).arg(data->getDate()));
+//    query.bindValue(":office_time",data->getOffice_time());
+//    query.bindValue(":flexible_time",data->getFlexible_time());
+//    query.bindValue(":summary",data->getNetto_zeit());
+//    query.bindValue(":monthIntyear",data->getDate());
     if(!query.exec()){
         qWarning() << "ERROR: Delete Table " << query.lastError();
     }
+    qDebug() << query.lastQuery();
 }
 
 void MainWindow::insert_table(Tagesdaten *data){
@@ -453,3 +464,4 @@ void MainWindow::show_table(){
         tablerow += 1;
     }
 }
+

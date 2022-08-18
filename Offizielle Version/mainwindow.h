@@ -50,6 +50,9 @@ private:
     void show_table();
     void delete_month(Tagesdaten *data);
 
+    void updateones();
+
+
     QSqlDatabase db;
 
 private slots:
