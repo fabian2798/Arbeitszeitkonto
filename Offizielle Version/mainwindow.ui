@@ -203,13 +203,6 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_stats_last3">
-               <property name="text">
-                <string>letzten 3 Monate</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
@@ -429,7 +422,7 @@ border-width:2px;</string>
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

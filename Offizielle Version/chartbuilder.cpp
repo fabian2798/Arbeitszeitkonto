@@ -10,13 +10,21 @@ QChartView * ChartBuilder::createDistributionChart(int office, int homeoffice){
 
     int sum = office + homeoffice;
     QPieSeries *series = new QPieSeries();
-    if(homeoffice == 0 or office == 0 ){
+    if(homeoffice == 0 and office == 0 ){
         series->append("Büro",  50);
         series->append("Home Office",  50);
         QMessageBox * info = new QMessageBox();
         info->setText("Keine Daten verfügbar.");
         info->setWindowTitle("Fehler!");
         info->open();
+    }
+    else if(homeoffice == 0){
+        series->append("Büro",  100);
+        series->append("Home Office",  0);
+    }
+    else if(office == 0){
+        series->append("Büro",  0);
+        series->append("Home Office",  100);
     }
     else{
     series->append("Büro",  double(office)/double(sum) * 100);
@@ -51,3 +59,4 @@ QHBoxLayout * ChartBuilder::createStatWidget(){
     newLayout->addWidget(createDistributionChart(60, 40));
     return newLayout;
 }
+
