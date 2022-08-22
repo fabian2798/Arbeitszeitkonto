@@ -50,7 +50,7 @@ private:
     QString monthtoInt(monat *m_data);
     void dateString(Tagesdaten *data, monat *m_data);
     void getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey);
-
+    QString IntToMonth(int month);
     void create_table();
     void insert_table(Tagesdaten *data);
     void show_table();
