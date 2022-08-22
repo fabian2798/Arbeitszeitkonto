@@ -53,7 +53,7 @@ private:
 
     void create_table();
     void insert_table(Tagesdaten *data);
-    void show_table();
+    void show_table(QString queryString);
 
     void update_day(Tagesdaten *data);
 
@@ -69,6 +69,7 @@ private slots:
     void on_pushButton_help_clicked();
     void on_pushButton_clicked();
     void on_pushButton_stats_update_clicked();
+    void on_pushButton_filter_table_clicked();
 };
 
 #endif // MAINWINDOW_H

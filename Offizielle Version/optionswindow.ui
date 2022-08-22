@@ -17,7 +17,7 @@
    <item>
     <widget class="QCommandLinkButton" name="commandLinkButton">
      <property name="text">
-      <string>Datenbank löschen</string>
+      <string>Datenbank zurücksetzen</string>
      </property>
     </widget>
    </item>

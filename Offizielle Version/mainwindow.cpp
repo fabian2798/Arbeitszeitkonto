@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
                 qWarning() << "ERROR: Connection " << db.lastError();
             }
         }
-
-        show_table();
+        ui->dateEdit_end_date->setDate(QDate::currentDate());
+        show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
         fillComboBoxesFromDB();
         ui -> frame_stats_distribution -> setLayout(ChartBuilder::createStatWidget());
         // geht noch nicht mit verschiedenen Startjahren
@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
         QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
         delete deleted;
         ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
-        QMainWindow::showMaximized();
+        //QMainWindow::showMaximized();
     }
 
 MainWindow::~MainWindow() // Destructor
@@ -355,7 +355,8 @@ void MainWindow::insert_table(Tagesdaten * data) {
 
 }
 
-void MainWindow::show_table() {
+void MainWindow::show_table(QString queryString) {
+    ui->datalist->clear();
     QString row = "";
     qint32 tablerow = 0;
     ui -> datalist -> setHorizontalHeaderLabels({
@@ -366,9 +367,9 @@ void MainWindow::show_table() {
         "Home",
         "Sum"
     }); //coloum names
-    ui -> datalist -> setRowCount(50); //Maximal angezeigte Zeilen
+    ui -> datalist -> setRowCount(93); //Maximal angezeigte Zeilen
     ui -> datalist -> setColumnCount(6);
-    QSqlQuery query("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
+    QSqlQuery query(queryString);
     if (!query.exec()) {
         qWarning() << "ERROR: Show Table" << query.lastError();
     }
@@ -512,7 +513,7 @@ void MainWindow::on_loadFile_clicked() {
     }
     //Show DB
     qDebug() << "Order: ID, Day, Date, Kürzel, Office_time, Flexible_time, summary";
-    show_table();
+    show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
 
     //Monatsübersicht
     toMinutesandHours( & monats_data); // (Int) Minuten to (String) Hour.Minuten
@@ -689,5 +690,37 @@ void MainWindow::on_pushButton_stats_update_clicked() {
     // --> hier ist der Fehler
     ui -> frame_stats_distribution -> layout() -> addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
 
+}
+
+void MainWindow::on_pushButton_filter_table_clicked()
+{
+    QString filterString = "SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto ";
+
+    // Start und Enddatum wird in den Query String eingefügt
+    filterString += "WHERE ( date BETWEEN '" + ui->dateEdit_begin_date->date().toString("yyyy-MM-dd") + "' AND '";
+    filterString += ui->dateEdit_end_date->date().toString("yyyy-MM-dd") + "')";
+
+
+    if(ui->checkBox_workday->isChecked() == false){
+        qDebug() << "checked";
+        filterString += " AND (type!='FA' AND type!='')";
+    }
+
+    // Checkboxen werden überprüft, gegebenenfalls werden die Bedingungen hinzugefügt.
+    if(ui->checkBox_url->isChecked() == false){
+        filterString += " AND (type!='URL')";
+    }
+    if(ui->checkBox_abs->isChecked() == false){
+        filterString += " AND (type!='ABS')";
+    }
+    if(ui->checkBox_krk->isChecked() == false){
+        filterString += " AND (type!='KRK')";
+    }
+
+    filterString += ";";
+
+
+    qDebug() << filterString;
+    show_table(filterString);
 }
 

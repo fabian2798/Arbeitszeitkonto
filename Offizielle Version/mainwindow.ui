@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -234,48 +234,153 @@
            <number>11</number>
           </property>
           <item>
-           <widget class="QTableWidget" name="datalist">
-            <property name="styleSheet">
-             <string notr="true">border-color:black;
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QTableWidget" name="datalist">
+              <property name="maximumSize">
+               <size>
+                <width>750</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">border-color:black;
 border-width:2px;</string>
-            </property>
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-            <property name="dragDropOverwriteMode">
-             <bool>false</bool>
-            </property>
-            <column>
-             <property name="text">
-              <string>day</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>date</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>type</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>office</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>flexible</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>summary</string>
-             </property>
-            </column>
-           </widget>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="dragDropOverwriteMode">
+               <bool>false</bool>
+              </property>
+              <column>
+               <property name="text">
+                <string>day</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>date</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>type</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>office</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>flexible</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>summary</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_2">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QGridLayout" name="gridLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_von">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Von</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLabel" name="label_bis_2">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Bis</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QCheckBox" name="checkBox_krk">
+                 <property name="text">
+                  <string>Krankheitstage</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QPushButton" name="pushButton_filter_table">
+                 <property name="text">
+                  <string>Search</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QCheckBox" name="checkBox_abs">
+                 <property name="text">
+                  <string>Berufsschultage</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QDateEdit" name="dateEdit_end_date"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QDateEdit" name="dateEdit_begin_date">
+                 <property name="displayFormat">
+                  <string>dd.MM.yyyy</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QCheckBox" name="checkBox_url">
+                 <property name="text">
+                  <string>Urlaubstage</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QCheckBox" name="checkBox_workday">
+                 <property name="text">
+                  <string>Arbeitstage</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -429,7 +534,7 @@ border-width:2px;</string>
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
