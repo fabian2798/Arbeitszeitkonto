@@ -248,14 +248,14 @@ QString MainWindow::monthtoInt(monat * m_data) {
     return monthstr;
 }
 
-
 void MainWindow::dateString(Tagesdaten *data, monat *m_data){
     data->setMonthInt(monthtoInt(m_data));
     QString date = m_data->getYear()+"-"+data->getMonthInt()+"-"+data->getTages_nr();
-    data->setDate(date);}
+    data->setDate(date);
+}
 
 
-QString IntToMonth(int month) {
+QString MainWindow::IntToMonth(int month) {
     QString monthstr = "0";
     if (month == 1) {
         monthstr = "Januar";
@@ -381,7 +381,7 @@ void MainWindow::show_table(QString queryString) {
         QString fl = query.value(4).toString();
         QString sum = query.value(5).toString();
         row = day + " " + date + " " + type + " " + of +" " + fl + " " + sum;
-        qDebug() << row;
+        //qDebug() << row;
         //Datenbank ausgabe
         ui -> datalist -> setItem(tablerow, 0, new QTableWidgetItem(day));
         ui -> datalist -> setItem(tablerow, 1, new QTableWidgetItem(date));
@@ -521,9 +521,12 @@ void MainWindow::on_loadFile_clicked() {
 
     file.close();
     ui -> lastFileLoaded -> insertItem(1, fileName);
+    fillComboBoxesFromDB();
 }
 
 void MainWindow::fillComboBoxesFromDB() {
+    ui->comboBox_begin_year->clear();
+    ui->comboBox_end_year->clear();
     QString queryString = "SELECT DISTINCT strftime('%Y', date) from zeitkonto;";
     QSqlQuery distinctYearSearch(queryString);
     if (!distinctYearSearch.exec()) {
@@ -531,7 +534,6 @@ void MainWindow::fillComboBoxesFromDB() {
     }
     while (distinctYearSearch.next()) {
         qDebug() << distinctYearSearch.value(0).toString();
-        qDebug() << "Hallo";
         ui -> comboBox_begin_year -> addItem(distinctYearSearch.value(0).toString());
         ui -> comboBox_end_year -> addItem(distinctYearSearch.value(0).toString());
     }
@@ -571,74 +573,73 @@ int db_timeToInt(QString string) {
 }
 
 
-void MainWindow::getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey) {
+void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString bm, QString by, QString em, QString ey) {
 
     QListWidget * p = ui -> frame_stats_distribution -> findChild < QListWidget * > ();
     p -> clear();
-    QString begin_month = bm;
-    QString end_month = em;
-    QString begin_year = by;
-    QString end_year = ey;
+
+    // Variable fürz.B. Umwandlung von '6' zu '06'
+    QString bm_with0 = bm;
+    QString em_with0 = em;
+    if (bm.toInt() < 10) {
+        bm_with0 = "0" + bm_with0;
+    }
+    if (em.toInt() < 10) {
+        em_with0 = "0" + em_with0;
+    }
+
     int summen[2];
+    summen[0] = 0; // Office Summe
+    summen[1] = 0; // Home Office Summe
 
     // falls im gleichem Jahr
-    if (begin_year == end_year) {
+    if (by == ey) {
 
         // für Auswahl eines Monats
-        if (begin_month == end_month) {
-            if (begin_month.toInt() < 10) {
-                begin_month = "0" + begin_month;
-            }
-
-            QString selectString = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) = '" + begin_month + "' ";
-            selectString += "AND strftime('%Y', date) = '" + begin_year + "';";
-            qDebug() << selectString;
+        if (bm == em) {
+            QString selectString = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) = '" + bm_with0 + "' ";
+            selectString += "AND strftime('%Y', date) = '" + by + "';";
             QSqlQuery q(selectString);
-            int summen[2];
-            summen[0] = 0; // Office Summe
-            summen[1] = 0; // Home Office Summe
 
             if (!q.isActive()) {
                 qWarning() << "ERROR: Create Table " << q.lastError();
             }
             if (!q.first()) {
-                qDebug() << "Nein";
-                qDebug() << QString::number(summen[0]) << " " << QString::number(summen[1]);
+                qDebug() << "Query empty";
             } else {
-                qDebug() << "Ja";
                 while (q.next()) {
                     summen[0] += db_timeToInt(q.value(1).toString());
                     summen[1] += db_timeToInt(q.value(2).toString());
                 }
             }
 
-            * test1 = summen[0];
-            * test2 = summen[1];
-            p -> addItem(IntToMonth(begin_month.toInt()));
+            * officesum = summen[0];
+            * homeofficesum = summen[1];
+            p -> addItem(IntToMonth(bm_with0.toInt()));
         }
+        // für mehrere Monate
         else {
-            // für mehrere Monate
 
-            // Zahlenreihe der Monate bilden
-            QStringList * test = new QStringList();
+
+            // Zahlenreihe der Monate bilden, die gefetched werden
+            QStringList * months = new QStringList();
             int i;
-            for (i = begin_month.toInt(); i < end_month.toInt() + 1; i++) {
+            for (i = bm_with0.toInt(); i < em_with0.toInt() + 1; i++) {
                 if (i < 10) {
-                    test -> append("0" + QString::number(i));
+                    months -> append("0" + QString::number(i));
                 } else {
-                    test -> append(QString::number(i));
+                    months -> append(QString::number(i));
                 }
-                QListWidget * p = ui -> frame_stats_distribution -> findChild < QListWidget * > ();
 
                 p -> addItem(IntToMonth(i));
             }
 
             QString selectString = "SELECT date, office_time, flexible_time from zeitkonto ";
 
-            for (auto x: * test) {
-                if (x == test -> last()) {
-                    selectString += "strftime('%m', date) ='" + x + "') AND (strftime('%Y', date) = '" + begin_year + "')";
-                } else if (x == test -> first()) {
+            for (auto x: * months) {
+                if (x == months -> last()) {
+                    selectString += "strftime('%m', date) ='" + x + "') AND (strftime('%Y', date) = '" + by + "')";
+                } else if (x == months -> first()) {
                     selectString += "WHERE (strftime('%m', date) ='" + x + "' OR ";
                 } else {
                     selectString += " strftime('%m', date) ='" + x + "' OR ";
@@ -647,9 +648,7 @@ void MainWindow::getDistribution(int * test1, int * test2, QString bm, QString b
             selectString += ";";
 
             QSqlQuery q(selectString);
-            qDebug() << selectString;
-            summen[0] = 0; // Office Summe
-            summen[1] = 0; // Home Office Summe
+
 
             if (!q.isActive()) {
                 qWarning() << "ERROR: Create Table " << q.lastError();
@@ -659,15 +658,61 @@ void MainWindow::getDistribution(int * test1, int * test2, QString bm, QString b
                 summen[1] += db_timeToInt(q.value(2).toString());
 
             }
-            * test1 = summen[0];
-            * test2 = summen[1];
+            * officesum = summen[0];
+            * homeofficesum = summen[1];
 
         }
 
     }
-    else{
-        * test1 = 0;
-        * test2 = 0;
+
+    // Jahresübergreifende Eingabe
+    else if (by != ey){
+
+        p->addItem("Von " + IntToMonth(bm.toInt()) + " " + by );
+
+        // Query für das erste Jahr
+        QString query = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) >= '";
+        query += bm_with0 + "' AND strftime('%Y', date) = '";
+        query += by + "';";
+        QSqlQuery firstYear(query);
+
+        while(firstYear.next()){
+            summen[0] += db_timeToInt(firstYear.value(1).toString());
+            summen[1] += db_timeToInt(firstYear.value(2).toString());
+        }
+
+
+        // Bei allen anderen Jahren ( z.B. Eingabe zwischen 2020 und 2024, dann werden hier die Jahre 2021 bis 2023 behandelt
+        if (ey.toInt()-1 != by.toInt()){
+            int i;
+            for(i=by.toInt() + 1;i < ey.toInt();i++){
+                p->addItem("über " + QString::number(i));
+                query = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%Y', date) = '";
+                query += QString::number(i) + "';";
+                QSqlQuery middleYear(query);
+
+                while(middleYear.next()){
+                    summen[0] += db_timeToInt(middleYear.value(1).toString());
+                    summen[1] += db_timeToInt(middleYear.value(2).toString());
+                    //qDebug() << firstYear.value(0).toString() << " " << firstYear.value(1).toString() << " " << firstYear.value(2).toString();
+                }
+            }
+        }
+
+         p->addItem("Bis " + IntToMonth(em.toInt()) + " " + ey);
+        // Query für das letzte Jahr
+        query = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) <= '";
+        query += bm_with0 + "' AND strftime('%Y', date) = '";
+        query += by + "';";
+
+
+        QSqlQuery lastYear(query);
+        while(lastYear.next()){
+            summen[0] += db_timeToInt(lastYear.value(1).toString());
+            summen[1] += db_timeToInt(lastYear.value(2).toString());
+        }
+        * officesum = summen[0];
+        * homeofficesum = summen[1];
     }
 }
 
@@ -687,7 +732,6 @@ void MainWindow::on_pushButton_stats_update_clicked() {
 
     delete deleted;
 
-    // --> hier ist der Fehler
     ui -> frame_stats_distribution -> layout() -> addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
 
 }

@@ -203,13 +203,6 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_stats_last3">
-               <property name="text">
-                <string>letzten 3 Monate</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
