@@ -456,24 +456,26 @@ void MainWindow::on_loadFile_clicked() {
             //Berechnung der Gesamtarbeitszeit
             day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(), day_data.getNetto_int(), day_data.getPausenzeit()); // (Flex+NT) - Pause
 
-            //Soll doppelte Buchung der Pausenzeit verhindern
-            //Monatsdaten werden jeden Tag um die rohe Arbeitszeit(mit Pausenabzug) addiert
+            //Bürotag, wo Pause abggezogen wird
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0) {
                 monats_data.setGes_Nettozeit(day_data.getNetto_int() - day_data.getPausenzeit());
                 day_data.setOffice_time_pause(); //officetime = netto - pause, flexible_time = flex
             }
+            //Homeoffice, wo Pause abgezogen wird
             if (day_data.getFlexNetto_int() > 0 && day_data.getNetto_int() == 0) {
                 monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int() - day_data.getPausenzeit());
                 day_data.setFlexible_time_pause(); // flexible_time = flex - pause, office_time = netto
             }
-            //Soll Minuszeiten verhindern falls Arbeitszeit zu kurz zum Pausenabzug war
+            //Homeoffice und Büro
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() > 0) {
-                if ((day_data.getFlexNetto_int() > 45 && day_data.getNetto_int() < 45) || (day_data.getNetto_int() > 45 && day_data.getFlexNetto_int() > 45)) {
+                //Pause von der Homeofficezeit abziehen, wenn Homeofficezeit länger als Bürozeit ist
+                if ((day_data.getFlexNetto_int() > day_data.getNetto_int())) {
                     monats_data.setGes_Nettozeit(day_data.getNetto_int());
                     monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int() - day_data.getPausenzeit());
                     day_data.setFlexible_time_pause();
                 }
-                if (day_data.getNetto_int() > 45 && day_data.getFlexNetto_int() < 45) {
+                //Pause von Bürozeit abziehen, wenn Bürozeit länger als Homeofficezeit ist
+                if (day_data.getNetto_int() > day_data.getFlexNetto_int()) {
                     monats_data.setGes_Nettozeit(day_data.getNetto_int() - day_data.getPausenzeit());
                     monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int());
                     day_data.setOffice_time_pause();
