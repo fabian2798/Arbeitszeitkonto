@@ -326,12 +326,11 @@ void MainWindow::update_day(Tagesdaten *data){
                           "SET office_time = '%1', "
                           "flexible_time = '%2', "
                           "summary = '%3' "
-                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time()).arg(data->getFlexible_time()).arg(data->getNetto_zeit()).arg(data->getDate()));
+                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time(), data->getFlexible_time(), data->getNetto_zeit(), data->getDate()));
     if(!query.exec()){
-
-        qWarning() << "ERROR: Delete Table " << query.lastError();
+        qWarning() << "ERROR: Update Table " << query.lastError();
     }
-    qDebug() << query.lastQuery();
+    //qDebug() << query.lastQuery();
 }
 
 void MainWindow::insert_table(Tagesdaten * data) {
@@ -416,17 +415,11 @@ void MainWindow::on_loadFile_clicked() {
     QTextStream in ( & file);
 
     QString Zeile;
-    QString Kommt;
-    QString Geht;
-    QString flexKommt;
-    QString flexGeht;
 
     qint32 flexgeht_int;
     qint32 flexkommt_int;
     qint32 kommt_int;
     qint32 geht_int;
-    QString flexMin;
-    QString ntMin;
     QString mView;
 
     ui -> lastFileLoaded -> clear();
@@ -497,19 +490,21 @@ void MainWindow::on_loadFile_clicked() {
             Zeile = "<" + day_data.getTag() + ">" + "  " + day_data.getTages_nr() + " " + day_data.getArb_art() + " " + "Büro: " + day_data.getOffice_time() + " " +
                 "FA: " + day_data.getFlexible_time() + " " + "Soll: " + day_data.getSoll_zeit() + " " +
                 "NT: " + day_data.getNetto_zeit() + " " + "Diff: " + day_data.getZeit_diff() + " " + "Saldo: " + day_data.getZeit_saldo();
-            //ui->listWidget_3->addItem(Zeile);
+            //qDebug() << Zeile;
 
             //Datenbank
             insert_table( & day_data);
+            update_day(&day_data);
 
-            monats_data.setGesamt(day_data.getGesamte_tageszeit()); // Add Tagesgesamt
+             // Add Tagesgesamt
+            monats_data.setGesamt(day_data.getGesamte_tageszeit());
 
             //Abschluss
             day_data.clearAllTimes(); //QList.clear()
         }
     }
     //Show DB
-    qDebug() << "Order: ID, Day, Date, Kürzel, Office_time, Flexible_time, summary";
+    //qDebug() << "Order: ID, Day, Date, Kürzel, Office_time, Flexible_time, summary";
     show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
 
     //Monatsübersicht
