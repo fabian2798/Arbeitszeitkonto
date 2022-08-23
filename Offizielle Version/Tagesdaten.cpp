@@ -316,7 +316,7 @@ void Tagesdaten::calc_breaktime(){
                     break;
                 }
                 if(geht[i] < kommt[i+1] && kommt[i+1] - geht[i] >= 15){//Pausenzeit wird anerkannt
-                    qDebug() << "time0.75";
+                    //qDebug() << "time0.75";
                     pausenzeit = pausenzeit + (kommt[i+1] - geht[i]);
                 }
                 if(kommt[i+1] == kommt.last()){//kann keine weitere Buchung kommen
@@ -329,12 +329,12 @@ void Tagesdaten::calc_breaktime(){
     //Bürotag mit nur einer Buchung
     if(kommt.size() == 1 && geht.size() == 1 && flexkommt.size() == 0 && flexgeht.size() == 0){//Mitarbeiter ist ein Stubenhocker und macht keine Pause
         if(netto_int+flexNetto_int >= 360 && netto_int+flexNetto_int < 540){//über 6h
-            qDebug() << "time3";
+            //qDebug() << "time3";
             is_gebucht = true;
             pausenzeit = 30;
         }
         if(netto_int+flexNetto_int >=540){
-            qDebug() << "time4";
+            //qDebug() << "time4";
             is_gebucht = true;
             pausenzeit = 45;//ab 9h
         }
@@ -346,26 +346,26 @@ void Tagesdaten::calc_breaktime(){
             for(int j = 0;j<flexgeht.size();j++){
                 //qDebug() << "j" << j;
                 if(flexkommt[j+1] == 0){//keine zweite Buchung
-                    qDebug() << "time4.5 break";
+                    //qDebug() << "time4.5 break";
                     break;
                 }
                 if(flexgeht[j] < flexkommt[j+1] && flexkommt[j+1] - flexgeht[j] >= 15){
-                    qDebug() << "time4.75";
+                    //qDebug() << "time4.75";
                     pausenzeit = pausenzeit + (flexkommt[j+1] - flexgeht[j]);
                 }
                 if(flexkommt[j+1] == flexkommt.last()){//Nachdem kann kein weiterer Eintrag kommen
-                    qDebug() << "time4.8 break";
+                    //qDebug() << "time4.8 break";
                     break;
                 }
             }
             if(abs(pausenzeit) == 0  && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540){//keine pause bei über 6h
-                qDebug() << "time5";
+                //qDebug() << "time5";
                 //qDebug() << "p5.1" << pausenzeit;
                 is_gebucht = true;
                 pausenzeit = 30;
             }
             if(abs(pausenzeit) == 0 && flexNetto_int+netto_int >= 540){//keine pause bei über 9h
-                qDebug() << "time6";
+                //qDebug() << "time6";
                 is_gebucht = true;
                 pausenzeit = 45;
             }
@@ -374,12 +374,12 @@ void Tagesdaten::calc_breaktime(){
     //Nur Homeoffice mit einer Buchung
     if(flexkommt.size() == 1 && flexgeht.size() == 1 && kommt.size() == 0 && geht.size() == 0){//Stubenhocker im Homeoffice -- keine Pause
         if(flexNetto_int >= 360 && flexNetto_int < 540){//über 6h
-            qDebug() << "time7";
+            //qDebug() << "time7";
             is_gebucht = true;
             pausenzeit = 30;
         }
         if(flexNetto_int+netto_int >= 540){
-            qDebug() << "time8";
+            //qDebug() << "time8";
             is_gebucht = true;
             pausenzeit = 45;//ab 9h
         }
@@ -394,12 +394,12 @@ void Tagesdaten::calc_breaktime(){
                     break;
                 }
                 if(geht[i] < kommt[i+1] && kommt[i+1] - geht[i] >= 15 && geht.size()>1){//Pausenzeit wird anerkannt
-                    qDebug() << "time8.5";
+                    //qDebug() << "time8.5";
                     pausenzeit = pausenzeit + (kommt[i+1] - geht[i]);
                 }
             }
             if(geht.last() < flexkommt.first()){
-                qDebug() << "time8.55";
+                //qDebug() << "time8.55";
                 pausenzeit = pausenzeit + (flexkommt.first() - geht.last());
                 //qDebug() << pausenzeit << "breaktime";
             }
@@ -412,34 +412,34 @@ void Tagesdaten::calc_breaktime(){
                     break;
                 }
                 if(flexgeht[i] < flexkommt[i+1] && flexkommt[i+1] - flexgeht[i] >= 15){//Pausenzeit wird anerkannt
-                    qDebug() << "time8.75";
+                    //qDebug() << "time8.75";
                     pausenzeit = pausenzeit + (flexkommt[i+1] - flexgeht[i]);
                 }
             }
             if(flexgeht.last() < kommt.first()){
-                qDebug() << "time8.8";
+                //qDebug() << "time8.8";
                 pausenzeit = pausenzeit + (flexgeht.last() - kommt.first());
             }
         }
     }
     if(abs(pausenzeit) >= 15 && pausenzeit < 30 && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540){//kleine pause gemacht aber noch nicht genug
-        qDebug() << "time6.3";
+        //qDebug() << "time6.3";
         //qDebug() << "p6.3" << pausenzeit;
         pausenzeit = 30 - pausenzeit;
     }
     if(abs(pausenzeit) >= 15 && pausenzeit < 45 && flexNetto_int+netto_int >= 540){//kleine pause gemacht aber noch nicht genug bei über 9h
-        qDebug() << "time6.33";
+        //qDebug() << "time6.33";
         //qDebug() << "p6.33" << pausenzeit;
         pausenzeit = 45 - pausenzeit;
     }
     if(abs(pausenzeit) >= 30 && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540 && is_gebucht == false){
        //qDebug() << "p2.2" << pausenzeit;
-       qDebug() << "time2.2";
+       //qDebug() << "time2.2";
         pausenzeit = 0; // Pause wurde genommen, Abzug am Schluss nötig
     }
     if(abs(pausenzeit) >= 45 && flexNetto_int+netto_int >= 540 && is_gebucht == false){
         //qDebug() << "p2.3" << pausenzeit;
-        qDebug() << "time2.3";
+        //qDebug() << "time2.3";
         pausenzeit = 0;
     }
 }
