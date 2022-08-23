@@ -601,9 +601,7 @@ void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString b
             if (!q.isActive()) {
                 qWarning() << "ERROR: Create Table " << q.lastError();
             }
-            if (!q.first()) {
-                qDebug() << "Query empty";
-            } else {
+            else {
                 while (q.next()) {
                     summen[0] += db_timeToInt(q.value(1).toString());
                     summen[1] += db_timeToInt(q.value(2).toString());
