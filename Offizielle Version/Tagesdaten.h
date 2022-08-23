@@ -123,8 +123,8 @@ private:
     QString zeit_diff;
     QString zeit_saldo;
 
-    QString office_time;
-    QString flexible_time;
+    QString office_time = "0.00";
+    QString flexible_time = "0.00";
 
     QList <QString> Kommt;
     QList <QString> Geht;
