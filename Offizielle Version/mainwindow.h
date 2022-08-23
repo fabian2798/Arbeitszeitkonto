@@ -46,7 +46,7 @@ private:
     Tagesdaten end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten *data);
     QString Minutes_toString(qint32 zeit_Min);
     void toMinutesandHours(monat *m_data);
-    QString get_monatsView(monat *m_data);
+
     QString monthtoInt(monat *m_data);
     void dateString(Tagesdaten *data, monat *m_data);
     void getDistribution(int * test1, int * test2, QString bm, QString by, QString em, QString ey);
@@ -63,7 +63,7 @@ private:
     QSqlDatabase db;
 
 private slots:
-    void drop_table();
+
     void on_loadFile_clicked();
     void on_pushButton_options_clicked();
     void on_pushButton_help_clicked();

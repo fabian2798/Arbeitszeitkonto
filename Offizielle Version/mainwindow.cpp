@@ -171,14 +171,6 @@ QString MainWindow::Minutes_toString(qint32 zeit_Min) {
     return str_minutes;
 }
 
-QString MainWindow::get_monatsView(monat * m_data) {
-    QString Zeile;
-    Zeile = m_data -> getMonth() + " " + m_data -> getYear() + "        " + "NT: " + m_data -> getGes_nt() + "    " +
-        "FA: " + m_data -> getGes_fnt() + "    " + "NT+FA: " + m_data -> getGesamtzeit() + "    " + "FA(in %): " + m_data -> getFaProzent();
-
-    return Zeile;
-}
-
 void MainWindow::toMinutesandHours(monat * m_data) {
     qint32 minutes = m_data -> getGes_Nettozeit() % 60;
     qint32 stunden = m_data -> getGes_Nettozeit() / 60;
@@ -291,15 +283,6 @@ QString MainWindow::IntToMonth(int month) {
     return monthstr;
 }
 
-
-
-void MainWindow::drop_table() {
-    QSqlQuery query("DROP TABLE zeitkonto");
-    if (!query.exec()) {
-        qWarning() << "ERROR: Drop Table" << query.lastError();
-    }
-}
-
 void MainWindow::create_table() {
     QSqlQuery query("CREATE TABLE IF NOT EXISTS zeitkonto("
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -328,7 +311,6 @@ void MainWindow::update_day(Tagesdaten *data){
     if(!query.exec()){
         qWarning() << "ERROR: Update Table " << query.lastError();
     }
-    //qDebug() << query.lastQuery();
 }
 
 void MainWindow::insert_table(Tagesdaten * data) {
@@ -412,8 +394,6 @@ void MainWindow::on_loadFile_clicked() {
 
     QTextStream in ( & file);
 
-    QString Zeile;
-
     qint32 flexgeht_int;
     qint32 flexkommt_int;
     qint32 kommt_int;
@@ -425,7 +405,6 @@ void MainWindow::on_loadFile_clicked() {
     Tagesdaten day_data = Tagesdaten(); //Konstructor
     monat monats_data = monat();
 
-    //drop_table();
     create_table();
 
     while (! in .atEnd()) {
@@ -485,10 +464,6 @@ void MainWindow::on_loadFile_clicked() {
             dateString( & day_data, & monats_data);
 
             qDebug() << "Tagesarbeitszeit: " << day_data.getGesamte_tageszeit();
-            Zeile = "<" + day_data.getTag() + ">" + "  " + day_data.getTages_nr() + " " + day_data.getArb_art() + " " + "Büro: " + day_data.getOffice_time() + " " +
-                "FA: " + day_data.getFlexible_time() + " " + "Soll: " + day_data.getSoll_zeit() + " " +
-                "NT: " + day_data.getNetto_zeit() + " " + "Diff: " + day_data.getZeit_diff() + " " + "Saldo: " + day_data.getZeit_saldo();
-            //qDebug() << Zeile;
 
             //Datenbank
             insert_table( & day_data);
@@ -507,7 +482,6 @@ void MainWindow::on_loadFile_clicked() {
 
     //Monatsübersicht
     toMinutesandHours( & monats_data); // (Int) Minuten to (String) Hour.Minuten
-    mView = get_monatsView( & monats_data); // Return Übersichtsstring des Monats
 
     file.close();
     ui -> lastFileLoaded -> insertItem(1, fileName);
