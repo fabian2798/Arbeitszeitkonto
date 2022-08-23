@@ -2,11 +2,8 @@
 
 #include "ui_mainwindow.h"
 
-//TO DO: UI-Design verbessern (z.B Statusbar einfügen -> File öffnen,Datenbank öffnen)->Marten
-//TO DO: Arbeitszeiten können nur zwischen und 6 und 19 Uhr eingelesen werden -> Bestätigung des Vorganges wird noch benötigt
 //TO DO: Mögliche Umstrukturierung der Pausenzeit - & Arbeitszeitalgortihmen -> geringe Priorität
 //TO DO: Überstunden werden noch nicht anders gewertet, zählen bisher einfach in die normale Arbeitszeit hinein -> Frage: Ob Überstunden mit in %-Anzahl einbezogen werden soll
-//TO DO: Tagesübersichtszeile anpassen (klare Darstellung)->Marten
 
 MainWindow::MainWindow(QWidget * parent) // Konstructor
     : QMainWindow(parent), ui(new Ui::MainWindow) {
