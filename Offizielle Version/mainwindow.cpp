@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
         show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
         fillComboBoxesFromDB();
         ui -> frame_stats_distribution -> setLayout(ChartBuilder::createStatWidget());
-        // geht noch nicht mit verschiedenen Startjahren
         QString currentMonth = QString::number(QDate::currentDate().month());
         QString beginMonth = QString::number(QDate::currentDate().month() - 2);
         QString currentYear = QString::number(QDate::currentDate().year());
@@ -32,7 +31,6 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
         QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
         delete deleted;
         ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
-        //QMainWindow::showMaximized();
     }
 
 MainWindow::~MainWindow() // Destructor
@@ -600,16 +598,17 @@ void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString b
             QString selectString = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) = '" + bm_with0 + "' ";
             selectString += "AND strftime('%Y', date) = '" + by + "';";
             QSqlQuery q(selectString);
+            qDebug() << selectString;
 
             if (!q.isActive()) {
                 qWarning() << "ERROR: Create Table " << q.lastError();
             }
-            if (!q.first()) {
-                qDebug() << "Query empty";
-            } else {
+            else {
                 while (q.next()) {
                     summen[0] += db_timeToInt(q.value(1).toString());
                     summen[1] += db_timeToInt(q.value(2).toString());
+                    qDebug() << summen[0] << " " << summen[1] << " " << q.value(0).toString();
+
                 }
             }
 

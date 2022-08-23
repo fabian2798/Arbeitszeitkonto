@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -381,35 +381,6 @@ border-width:2px;</string>
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="2" column="1">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Maximum</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>600</width>
-            <height>50</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="pushButton_options">
-          <property name="maximumSize">
-           <size>
-            <width>200</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Optionen</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="1">
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
@@ -426,6 +397,35 @@ border-width:2px;</string>
           </property>
          </spacer>
         </item>
+        <item row="2" column="1">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Maximum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>600</width>
+            <height>50</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="loadFile">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Datei laden</string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0">
          <widget class="QPushButton" name="pushButton_help">
           <property name="maximumSize">
@@ -439,19 +439,26 @@ border-width:2px;</string>
           </property>
          </widget>
         </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton_options">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Optionen</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="1">
-         <widget class="QFrame" name="frame">
+         <widget class="QWidget" name="widget" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
@@ -493,26 +500,6 @@ border-width:2px;</string>
             </widget>
            </item>
           </layout>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="loadFile">
-          <property name="maximumSize">
-           <size>
-            <width>200</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Datei laden</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>testbutton</string>
-          </property>
          </widget>
         </item>
        </layout>
