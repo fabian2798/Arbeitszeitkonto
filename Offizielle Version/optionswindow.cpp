@@ -12,3 +12,11 @@ OptionsWindow::~OptionsWindow()
 {
     delete ui;
 }
+
+void OptionsWindow::drop_table() {
+    QSqlQuery query("DROP TABLE zeitkonto");
+    if (!query.exec()) {
+        qWarning() << "ERROR: Drop Table" << query.lastError();
+    }
+}
+
