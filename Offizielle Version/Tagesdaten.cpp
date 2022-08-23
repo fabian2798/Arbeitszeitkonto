@@ -539,8 +539,6 @@ void Tagesdaten::setOffice_time_pause()
     QString f_min = QString::number(flextime_min);
     QString f_h = QString::number(flextime_h);
 
-    qDebug() << "OF büromin" << officetime_min;
-    qDebug() << "OF FAmin" << flextime_min;
     if(officetime_min < 10){
         of_min = "0"+QString::number(officetime_min);
     }
@@ -571,8 +569,6 @@ void Tagesdaten::setFlexible_time_pause()
     QString f_min = QString::number(flextime_min);
     QString of_min = QString::number(officetime_min);
 
-    qDebug() << "FA büromin" << officetime_min;
-    qDebug() << "FA FAmin" << flextime_min;
     if(officetime_min < 10){
         of_min = "0"+QString::number(officetime_min);
     }

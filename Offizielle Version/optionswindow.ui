@@ -42,8 +42,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>290</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -58,8 +58,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>290</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -67,5 +67,24 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>commandLinkButton</sender>
+   <signal>clicked()</signal>
+   <receiver>OptionsWindow</receiver>
+   <slot>drop_table()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>116</x>
+     <y>150</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>47</x>
+     <y>266</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>drop_table()</slot>
+ </slots>
 </ui>

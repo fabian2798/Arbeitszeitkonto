@@ -422,8 +422,6 @@ void MainWindow::on_loadFile_clicked() {
 
     ui -> lastFileLoaded -> clear();
 
-    //Darstellung der Daten des akutell verwendeten Files
-
     Tagesdaten day_data = Tagesdaten(); //Konstructor
     monat monats_data = monat();
 
