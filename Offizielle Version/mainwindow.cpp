@@ -1,13 +1,10 @@
 ﻿#include "mainwindow.h"
-
 #include "ui_mainwindow.h"
-
-//TO DO: Mögliche Umstrukturierung der Pausenzeit - & Arbeitszeitalgortihmen -> geringe Priorität
-//TO DO: Überstunden werden noch nicht anders gewertet, zählen bisher einfach in die normale Arbeitszeit hinein -> Frage: Ob Überstunden mit in %-Anzahl einbezogen werden soll
 
 MainWindow::MainWindow(QWidget * parent) // Konstructor
     : QMainWindow(parent), ui(new Ui::MainWindow) {
         ui -> setupUi(this);
+        //DB Connection
         const QString DRIVER("QSQLITE");
         if (QSqlDatabase::isDriverAvailable(DRIVER)) {
             db = QSqlDatabase::addDatabase(DRIVER);
@@ -16,6 +13,7 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
                 qWarning() << "ERROR: Connection " << db.lastError();
             }
         }
+
         ui->dateEdit_end_date->setDate(QDate::currentDate());
         show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
         fillComboBoxesFromDB();
@@ -132,8 +130,9 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
                 data -> setZeit_saldo(endteil_pieces.value(11));
             }
         }
-        //qDebug() << anfang<<"anfangszeit";
-        //qDebug() << ende << "endzeit";
+        qDebug() << mittelteil1 << "mittelteil1";
+        qDebug() << anfang<<"anfangszeit";
+        qDebug() << ende << "endzeit";
         // Zeiterfassung
         data -> add_toarbeitszeit(anfang, ende);
     }
@@ -371,13 +370,14 @@ void MainWindow::show_table(QString queryString) {
     }
 }
 
-
+//Fenster für Optionen, wie Drop Table
 void MainWindow::on_pushButton_options_clicked() {
     OptionsWindow * OW = new OptionsWindow();
     OW -> setModal(true);
     OW -> exec();
 }
 
+//Fenster zum Hinweis bei Fragen
 void MainWindow::on_pushButton_help_clicked() {
     HelpWindow * HW = new HelpWindow();
     HW -> setModal(true);
@@ -436,7 +436,7 @@ void MainWindow::on_loadFile_clicked() {
             day_data.calc_breaktime();
             //Berechnung der Gesamtarbeitszeit
             day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(), day_data.getNetto_int(), day_data.getPausenzeit()); // (Flex+NT) - Pause
-
+            qDebug() << "Pausenzeit: " << day_data.getPausenzeit();
             //Soll doppelte Buchung der Pausenzeit verhindern
             //Monatsdaten werden jeden Tag um die rohe Arbeitszeit(mit Pausenabzug) addiert
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0) {
@@ -449,12 +449,12 @@ void MainWindow::on_loadFile_clicked() {
             }
             //Soll Minuszeiten verhindern falls Arbeitszeit zu kurz zum Pausenabzug war
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() > 0) {
-                if ((day_data.getFlexNetto_int() > 45 && day_data.getNetto_int() < 45) || (day_data.getNetto_int() > 45 && day_data.getFlexNetto_int() > 45)) {
+                if (day_data.getFlexNetto_int() > day_data.getNetto_int()){
                     monats_data.setGes_Nettozeit(day_data.getNetto_int());
                     monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int() - day_data.getPausenzeit());
                     day_data.setFlexible_time_pause();
                 }
-                if (day_data.getNetto_int() > 45 && day_data.getFlexNetto_int() < 45) {
+                if (day_data.getNetto_int() > day_data.getFlexNetto_int()) {
                     monats_data.setGes_Nettozeit(day_data.getNetto_int() - day_data.getPausenzeit());
                     monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int());
                     day_data.setOffice_time_pause();

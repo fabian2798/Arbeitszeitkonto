@@ -125,12 +125,12 @@ private:
 
     QString office_time = "0.00";
     QString flexible_time = "0.00";
-
+    //Listen der Zeitstrings (9:32)
     QList <QString> Kommt;
     QList <QString> Geht;
     QList <QString> flexArbkommt;
     QList <QString> flexArbgeht;
-
+    //Listen der Zeiten in Minuten (572)
     QList <qint32> kommt;
     QList <qint32> geht;
     QList <qint32> flexkommt;
