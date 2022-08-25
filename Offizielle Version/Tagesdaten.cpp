@@ -164,7 +164,7 @@ void Tagesdaten::setGesamte_tageszeit(qint32 flex, qint32 netto,qint32 pause)
 void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     //Gleitzeit beachten
     if(!anfang.isEmpty()){
-    qint32 anfangint = just_Minutes(anfang);
+    qint32 anfangint = just_Minutes(anfang, "H:mm");
     if(anfangint < 360){
         //qDebug() << "anfang unter 6uhr";
         anfang = "6:00";
@@ -175,7 +175,7 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     }
     }
     if(!ende.isEmpty()){
-    qint32 endeint = just_Minutes(ende);
+    qint32 endeint = just_Minutes(ende, "H:mm");
     //qDebug() << "endeint: " << endeint;
     if(endeint < 360){
         //qDebug() << "ende unter 6uhr";
@@ -190,21 +190,21 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     if(!anfang.isEmpty() && !ende.isEmpty()){
         //qDebug() << "Bürozeit";
         Kommt.append(anfang);
-        kommt_zeiten.append(just_Minutes(anfang));
+        kommt_zeiten.append(just_Minutes(anfang, "H:mm"));
         Geht.append(ende);
-        geht_zeiten.append(just_Minutes(ende));
+        geht_zeiten.append(just_Minutes(ende, "H:mm"));
     }
     //Homeoffice eintragen
     if(anfang.isEmpty() && !ende.isEmpty()){
         if(flexArbkommt.size() == flexArbgeht.size()){
         //qDebug() << "Homeoffice Begin";
         flexArbkommt.append(ende);
-        kommt_zeiten.append(just_Minutes(ende));
+        kommt_zeiten.append(just_Minutes(ende, "H:mm"));
         }
         if(flexArbgeht.size() < flexArbkommt.size() && already_inflexArbkommt(ende) == false){
             //qDebug() << "Homeoffice Ende";
             flexArbgeht.append(ende);
-            geht_zeiten.append(just_Minutes(ende));
+            geht_zeiten.append(just_Minutes(ende, "H:mm"));
         }
     }
 }
@@ -352,8 +352,8 @@ void Tagesdaten::setFlexNetto_int(qint32 newFlexNetto_int)
     this->flexNetto_int = newFlexNetto_int;
 }
 
-qint32 Tagesdaten::just_Minutes(QString zeit){
-    QTime time = QTime::fromString(zeit, "H:mm");
+qint32 Tagesdaten::just_Minutes(QString zeit, QString pattern){
+    QTime time = QTime::fromString(zeit, pattern);
     qint32 minutes = (time.hour() * 60) + time.minute();
     return minutes;
 }

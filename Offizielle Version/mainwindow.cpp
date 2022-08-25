@@ -173,27 +173,13 @@ QString MainWindow::Minutes_toString(qint32 zeit_Min) {
     return str_minutes;
 }
 
-void MainWindow::toMinutesandHours(monat * m_data) {
-    qint32 minutes = m_data -> getGes_Nettozeit() % 60;
-    qint32 stunden = m_data -> getGes_Nettozeit() / 60;
-    qint32 flminutes = m_data -> getGes_Flexnettozeit() % 60;
-    qint32 flstunden = m_data -> getGes_Flexnettozeit() / 60;
+QString MainWindow::toMinutesandHours(qint32 zeit_inMin) {
+    qint32 minutes = zeit_inMin % 60;
+    qint32 stunden = zeit_inMin / 60;
 
-    qint32 ges_minutes = m_data -> getGesamt() % 60;
-    qint32 ges_stunden = m_data -> getGesamt() / 60;
+    QString hour_min = Minutes_toString(stunden) + "." + Minutes_toString(minutes);
 
-    double flnt = m_data -> getGes_Flexnettozeit();
-    double gesamtzeit = m_data -> getGesamt();
-    double faProzent = (flnt / gesamtzeit) * 100;
-
-    QString ges_zeit = Minutes_toString(ges_stunden) + "." + Minutes_toString(ges_minutes);
-    QString ges_nt = Minutes_toString(stunden) + "." + Minutes_toString(minutes);
-    QString ges_fnt = Minutes_toString(flstunden) + "." + Minutes_toString(flminutes);
-
-    m_data -> setFaProzent(faProzent);
-    m_data -> setGesamtzeit(ges_zeit);
-    m_data -> setGes_nt(ges_nt);
-    m_data -> setGes_fnt(ges_fnt);
+    return hour_min;
 }
 
 QString MainWindow::monthtoInt(monat * m_data) {
@@ -305,11 +291,15 @@ void MainWindow::create_table() {
 //IDEE: Falls zwei verschiedene Journale des gleichen Monats geladen werden, werden alle Tage des Monats geupdatet
 void MainWindow::update_day(Tagesdaten *data){
     QSqlQuery query;
+    qint32 of_int = data->just_Minutes(data->getOffice_time(), "H.mm");
+    qint32 fa_int = data->just_Minutes(data->getFlexible_time(), "H.mm");
+    qDebug() << of_int << fa_int;
+    QString ges_Str = toMinutesandHours((of_int + fa_int));
     query.prepare(QString("UPDATE [zeitkonto] "
                           "SET office_time = '%1', "
                           "flexible_time = '%2', "
                           "summary = '%3' "
-                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time(), data->getFlexible_time(), data->getNetto_zeit(), data->getDate()));
+                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time(), data->getFlexible_time(), ges_Str, data->getDate()));
     if(!query.exec()){
         qWarning() << "ERROR: Update Table " << query.lastError();
     }
@@ -418,8 +408,8 @@ void MainWindow::on_loadFile_clicked() {
                 QVarLengthArray < QString > temp_geht = day_data.getGeht();
                 QVarLengthArray < QString > temp_kommt = day_data.getKommt();
                 for (int i = 0; i < day_data.getGeht().size(); i++) {
-                    kommt_int = day_data.just_Minutes(temp_kommt[i]);
-                    geht_int = day_data.just_Minutes(temp_geht[i]);
+                    kommt_int = day_data.just_Minutes(temp_kommt[i], "H:mm");
+                    geht_int = day_data.just_Minutes(temp_geht[i], "H:mm");
                     end_calc(kommt_int, geht_int, & day_data);
                 }
             }
@@ -427,8 +417,8 @@ void MainWindow::on_loadFile_clicked() {
                 QVarLengthArray < QString > temp_flexgeht = day_data.getFlexArbgeht();
                 QVarLengthArray < QString > temp_flexkommt = day_data.getFlexArbkommt();
                 for (int j = 0; j < day_data.getFlexArbgeht().size(); j++) {
-                    flexkommt_int = day_data.just_Minutes(temp_flexkommt[j]);
-                    flexgeht_int = day_data.just_Minutes(temp_flexgeht[j]);
+                    flexkommt_int = day_data.just_Minutes(temp_flexkommt[j], "H:mm");
+                    flexgeht_int = day_data.just_Minutes(temp_flexgeht[j], "H:mm");
                     end_flexcalc(flexkommt_int, flexgeht_int, & day_data);
                 }
             }
@@ -488,7 +478,15 @@ void MainWindow::on_loadFile_clicked() {
     show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
 
     //Monatsübersicht
-    toMinutesandHours( & monats_data); // (Int) Minuten to (String) Hour.Minuten
+    QString hour_min = toMinutesandHours(monats_data.getGes_Nettozeit()); // (Int) Minuten to (String) Hour.Minuten
+    monats_data.setGes_nt(hour_min);
+    hour_min = toMinutesandHours(monats_data.getGes_Flexnettozeit()); // (Int) Minuten to (String) Hour.Minuten
+    monats_data.setGes_fnt(hour_min);
+    hour_min = toMinutesandHours(monats_data.getGesamt()); // (Int) Minuten to (String) Hour.Minuten
+    monats_data.setGesamtzeit(hour_min);
+
+    monats_data.setFaProzent(monats_data.getGes_Flexnettozeit(), monats_data.getGesamt());
+
 
     file.close();
     ui -> lastFileLoaded -> insertItem(1, fileName);

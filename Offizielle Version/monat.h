@@ -32,7 +32,7 @@ public:
     void setGesamt(qint32 tages_gesamt);
 
     const QString &getFaProzent() const;
-    void setFaProzent(double newFaProzent);
+    void setFaProzent(qint32 flex, qint32 gesamt);
 
 private:
     qint32 ges_Nettozeit;

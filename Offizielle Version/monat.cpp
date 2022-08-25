@@ -85,9 +85,13 @@ const QString &monat::getFaProzent() const
     return faProzent;
 }
 
-void monat::setFaProzent(double newFaProzent)
+void monat::setFaProzent(qint32 flex, qint32 gesamt)
 {
-    faProzent = QString::number(newFaProzent);
+    double flnt = flex;
+    double gesamtzeit = gesamt;
+
+    double prozente = (flnt / gesamtzeit) * 100;
+    faProzent = QString::number(prozente);
 }
 
 

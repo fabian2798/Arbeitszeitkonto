@@ -45,7 +45,7 @@ private:
     Tagesdaten end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten *data);
     Tagesdaten end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten *data);
     QString Minutes_toString(qint32 zeit_Min);
-    void toMinutesandHours(monat *m_data);
+    QString toMinutesandHours(qint32 zeit_inMin);
 
     QString monthtoInt(monat *m_data);
     void dateString(Tagesdaten *data, monat *m_data);

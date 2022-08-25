@@ -93,7 +93,7 @@ public:
     const QVarLengthArray<qint32> &getRemember_timeflexgeht() const;
     void setRemember_timeflexgeht(qint32 newRemember_timeflexgeht);
 
-    qint32 just_Minutes(QString zeit);
+    qint32 just_Minutes(QString zeit, QString pattern);
 
     const QString &getOffice_time() const;
     void setOffice_time_pause();
