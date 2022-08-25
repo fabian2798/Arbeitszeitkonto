@@ -161,7 +161,8 @@ void Tagesdaten::setGesamte_tageszeit(qint32 flex, qint32 netto,qint32 pause)
     gesamte_tageszeit = (flex + netto) - pause;
 }
 //insert times(string) into arrays
-void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
+void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende)
+{
     //Gleitzeit beachten
     if(!anfang.isEmpty()){
     qint32 anfangint = just_Minutes(anfang, "H:mm");
@@ -209,7 +210,8 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     }
 }
 //reset all data collected from a day
-void Tagesdaten::clearAllTimes(){
+void Tagesdaten::clearAllTimes()
+{
    Kommt.clear();
    Geht.clear();
    flexArbkommt.clear();
@@ -352,7 +354,8 @@ void Tagesdaten::setFlexNetto_int(qint32 newFlexNetto_int)
     this->flexNetto_int = newFlexNetto_int;
 }
 
-qint32 Tagesdaten::just_Minutes(QString zeit, QString pattern){
+qint32 Tagesdaten::just_Minutes(QString zeit, QString pattern)
+{
     QTime time = QTime::fromString(zeit, pattern);
     qint32 minutes = (time.hour() * 60) + time.minute();
     return minutes;

@@ -1,6 +1,9 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+//TO DO: Message, dass Daten nicht richtig eingelesen werden konnten z.b bei Fehlbuchungen -- Programm stürtzt nicht ab sondern gibt für die fehlerhaften Tage 0.00 Werte aus
+//Zusatz: User kann entscheiden, ob fehlerhafte Tage gelöscht werden -- Anzeige könnte reichen, da bei doppeltem Einlesen DB-Daten geupdatet werden
+
 MainWindow::MainWindow(QWidget * parent) // Konstructor
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -240,7 +243,7 @@ void MainWindow::dateString(Tagesdaten *data, monat *m_data)
     QString date = m_data->getYear()+"-"+data->getMonthInt()+"-"+data->getTages_nr();
     data->setDate(date);
 }
-
+//month numbers to month name
 QString MainWindow::IntToMonth(int month)
 {
     QString monthstr = "0";
