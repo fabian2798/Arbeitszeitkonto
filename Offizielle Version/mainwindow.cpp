@@ -1,13 +1,10 @@
 ﻿#include "mainwindow.h"
-
 #include "ui_mainwindow.h"
-
-//TO DO: Mögliche Umstrukturierung der Pausenzeit - & Arbeitszeitalgortihmen -> geringe Priorität
-//TO DO: Überstunden werden noch nicht anders gewertet, zählen bisher einfach in die normale Arbeitszeit hinein -> Frage: Ob Überstunden mit in %-Anzahl einbezogen werden soll
 
 MainWindow::MainWindow(QWidget * parent) // Konstructor
     : QMainWindow(parent), ui(new Ui::MainWindow) {
         ui -> setupUi(this);
+        //DB Connection
         const QString DRIVER("QSQLITE");
         if (QSqlDatabase::isDriverAvailable(DRIVER)) {
             db = QSqlDatabase::addDatabase(DRIVER);
@@ -16,11 +13,14 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
                 qWarning() << "ERROR: Connection " << db.lastError();
             }
         }
+
         ui->dateEdit_end_date->setDate(QDate::currentDate());
         show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
         fillComboBoxesFromDB();
         ui -> frame_stats_distribution -> setLayout(ChartBuilder::createStatWidget());
         QString currentMonth = QString::number(QDate::currentDate().month());
+        // geht noch nicht mit verschiedenen Startjahren
+        /*QString currentMonth = QString::number(QDate::currentDate().month());
         QString beginMonth = QString::number(QDate::currentDate().month() - 2);
         QString currentYear = QString::number(QDate::currentDate().year());
         getDistribution(&valuesOfChart[0], &valuesOfChart[1], beginMonth , currentYear, currentMonth, currentYear);
@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
         QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
         delete deleted;
         ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
+        ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));*/
+        //QMainWindow::showMaximized();
     }
 
 MainWindow::~MainWindow() // Destructor
@@ -130,8 +132,8 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
                 data -> setZeit_saldo(endteil_pieces.value(11));
             }
         }
-        //qDebug() << anfang<<"anfangszeit";
-        //qDebug() << ende << "endzeit";
+        qDebug() << anfang<<"anfangszeit";
+        qDebug() << ende << "endzeit";
         // Zeiterfassung
         data -> add_toarbeitszeit(anfang, ende);
     }
@@ -323,7 +325,7 @@ void MainWindow::insert_table(Tagesdaten * data) {
     query.bindValue(":type", data -> getArb_art());
     query.bindValue(":office_time", data -> getOffice_time());
     query.bindValue(":flexible_time", data -> getFlexible_time());
-    query.bindValue(":summary", data -> getNetto_zeit()); //Netto Arbeitszeit am Tag
+    query.bindValue(":summary", (data -> getOffice_time() + data -> getFlexible_time())); //Netto Arbeitszeit am Tag
     db.commit();
     if (!query.exec()) {
         qWarning() << "ERROR: Insert Table " << query.lastError();
@@ -369,13 +371,14 @@ void MainWindow::show_table(QString queryString) {
     }
 }
 
-
+//Fenster für Optionen, wie Drop Table
 void MainWindow::on_pushButton_options_clicked() {
     OptionsWindow * OW = new OptionsWindow();
     OW -> setModal(true);
     OW -> exec();
 }
 
+//Fenster zum Hinweis bei Fragen
 void MainWindow::on_pushButton_help_clicked() {
     HelpWindow * HW = new HelpWindow();
     HW -> setModal(true);
@@ -413,8 +416,8 @@ void MainWindow::on_loadFile_clicked() {
         //Ende jedes Tages
         if (day_data.getEnd_line() == true) {
             if (day_data.getKommt().size() > 0) {
-                QList < QString > temp_geht = day_data.getGeht();
-                QList < QString > temp_kommt = day_data.getKommt();
+                QVarLengthArray < QString > temp_geht = day_data.getGeht();
+                QVarLengthArray < QString > temp_kommt = day_data.getKommt();
                 for (int i = 0; i < day_data.getGeht().size(); i++) {
                     kommt_int = day_data.just_Minutes(temp_kommt[i]);
                     geht_int = day_data.just_Minutes(temp_geht[i]);
@@ -422,8 +425,8 @@ void MainWindow::on_loadFile_clicked() {
                 }
             }
             if (day_data.getFlexArbkommt().size() > 0) {
-                QList < QString > temp_flexgeht = day_data.getFlexArbgeht();
-                QList < QString > temp_flexkommt = day_data.getFlexArbkommt();
+                QVarLengthArray < QString > temp_flexgeht = day_data.getFlexArbgeht();
+                QVarLengthArray < QString > temp_flexkommt = day_data.getFlexArbkommt();
                 for (int j = 0; j < day_data.getFlexArbgeht().size(); j++) {
                     flexkommt_int = day_data.just_Minutes(temp_flexkommt[j]);
                     flexgeht_int = day_data.just_Minutes(temp_flexgeht[j]);
@@ -436,6 +439,10 @@ void MainWindow::on_loadFile_clicked() {
             day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(), day_data.getNetto_int(), day_data.getPausenzeit()); // (Flex+NT) - Pause
 
             //Bürotag, wo Pause abggezogen wird
+            qDebug() << "Pausenzeit: " << day_data.getPausenzeit();
+
+            //Soll doppelte Buchung der Pausenzeit verhindern
+            //Monatsdaten werden jeden Tag um die rohe Arbeitszeit(mit Pausenabzug) addiert
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0) {
                 monats_data.setGes_Nettozeit(day_data.getNetto_int() - day_data.getPausenzeit());
                 day_data.setOffice_time_pause(); //officetime = netto - pause, flexible_time = flex
@@ -449,6 +456,7 @@ void MainWindow::on_loadFile_clicked() {
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() > 0) {
                 //Pause von der Homeofficezeit abziehen, wenn Homeofficezeit länger als Bürozeit ist
                 if ((day_data.getFlexNetto_int() > day_data.getNetto_int())) {
+                if (day_data.getFlexNetto_int() > day_data.getNetto_int()){
                     monats_data.setGes_Nettozeit(day_data.getNetto_int());
                     monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int() - day_data.getPausenzeit());
                     day_data.setFlexible_time_pause();
@@ -459,6 +467,7 @@ void MainWindow::on_loadFile_clicked() {
                     monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int());
                     day_data.setOffice_time_pause();
                 }
+            }
             }
             //Datumszeile
             dateString( & day_data, & monats_data);
@@ -474,7 +483,7 @@ void MainWindow::on_loadFile_clicked() {
 
             //Abschluss
             day_data.clearAllTimes(); //QList.clear()
-        }
+    }
     }
     //Show DB
     //qDebug() << "Order: ID, Day, Date, Kürzel, Office_time, Flexible_time, summary";
@@ -488,7 +497,7 @@ void MainWindow::on_loadFile_clicked() {
     fillComboBoxesFromDB();
 }
 
-void MainWindow::fillComboBoxesFromDB() {
+void MainWindow::fillComboBoxesFromDB(){
     ui->comboBox_begin_year->clear();
     ui->comboBox_end_year->clear();
     QString queryString = "SELECT DISTINCT strftime('%Y', date) from zeitkonto;";

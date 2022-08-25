@@ -1,8 +1,9 @@
 #ifndef TAGESDATEN_H
 #define TAGESDATEN_H
 
-#include <QDebug>
+#include <QString>
 #include <QTime>
+#include <algorithm>
 
 class Tagesdaten
 {
@@ -43,22 +44,24 @@ public:
 
     const QList<QString> &getTagesende() const;
 
-    const QList<QString> &getKommt() const;
+    const QVarLengthArray<QString> &getKommt() const;
     void setKommt(QString newKommt);
 
-    const QList<QString> &getGeht() const;
+    const QVarLengthArray<QString> &getGeht() const;
     void setGeht(QString newGeht);
 
     bool already_inKommt(QString anfang);
 
     bool already_inGeht(QString ende);
 
-    const QList<QString> &getFlexArbkommt() const;
+    const QVarLengthArray<QString> &getFlexArbkommt() const;
     void setFlexArbkommt(QString newFlexArb);
 
-    bool already_inflexArb(QString anfang);
+    bool already_inflexArbkommt(QString ende);
 
-    const QList<QString> &getFlexArbgeht() const;
+    bool already_inflexgeht(QString ende);
+
+    const QVarLengthArray<QString> &getFlexArbgeht() const;
     void setFlexArbgeht(QString newFlexArbgeht);
 
     qint32 getGesamte_tageszeit() const;
@@ -78,16 +81,16 @@ public:
     void add_toFlexNetto_int(qint32 newFlexNetto_int);
     void setFlexNetto_int(qint32 newFlexNetto_int);
 
-    const QList<qint32> &getRemember_timekommt() const;
+    const QVarLengthArray<qint32> &getRemember_timekommt() const;
     void setRemember_timekommt(qint32 newRemember_timekommt);
 
-    const QList<qint32> &getRemember_timegeht() const;
+    const QVarLengthArray<qint32> &getRemember_timegeht() const;
     void setRemember_timegeht(qint32 newRemember_timegeht);
 
-    const QList<qint32> &getRemember_timeflexkommt() const;
+    const QVarLengthArray<qint32> &getRemember_timeflexkommt() const;
     void setRemember_timeflexkommt(qint32 newRemember_timeflexkommt);
 
-    const QList<qint32> &getRemember_timeflexgeht() const;
+    const QVarLengthArray<qint32> &getRemember_timeflexgeht() const;
     void setRemember_timeflexgeht(qint32 newRemember_timeflexgeht);
 
     qint32 just_Minutes(QString zeit);
@@ -107,6 +110,13 @@ public:
 
     void setDaytimesZero();
 
+    const QVarLengthArray<qint32> &getKommt_zeiten() const;
+    void setKommt_zeiten(qint32 &newKommt_zeiten);
+
+    const QVarLengthArray<qint32> &getGeht_zeiten() const;
+    void setGeht_zeiten(qint32 &newGeht_zeiten);
+
+
 private:
     qint32 gesamte_tageszeit = 0;
     qint32 pausenzeit = 0;
@@ -125,16 +135,20 @@ private:
 
     QString office_time = "0.00";
     QString flexible_time = "0.00";
+    //Listen der Zeitstrings (9:32)
+    QVarLengthArray <QString> Kommt;
+    QVarLengthArray <QString> Geht;
+    QVarLengthArray <QString> flexArbkommt;
+    QVarLengthArray <QString> flexArbgeht;
+    //Listen der Zeiten in Minuten (572)
+    QVarLengthArray <qint32> kommt;
+    QVarLengthArray <qint32> geht;
+    QVarLengthArray <qint32> flexkommt;
+    QVarLengthArray <qint32> flexgeht;
 
-    QList <QString> Kommt;
-    QList <QString> Geht;
-    QList <QString> flexArbkommt;
-    QList <QString> flexArbgeht;
-
-    QList <qint32> kommt;
-    QList <qint32> geht;
-    QList <qint32> flexkommt;
-    QList <qint32> flexgeht;
+    //Pausenzeitenberechnung
+    QVarLengthArray<qint32> kommt_zeiten;
+    QVarLengthArray<qint32> geht_zeiten;
 
     QString monthInt;
     QString date;
