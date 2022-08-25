@@ -18,7 +18,6 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
         show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
         fillComboBoxesFromDB();
         ui -> frame_stats_distribution -> setLayout(ChartBuilder::createStatWidget());
-        QString currentMonth = QString::number(QDate::currentDate().month());
         // geht noch nicht mit verschiedenen Startjahren
         /*QString currentMonth = QString::number(QDate::currentDate().month());
         QString beginMonth = QString::number(QDate::currentDate().month() - 2);
@@ -176,8 +175,13 @@ QString MainWindow::Minutes_toString(qint32 zeit_Min) {
 QString MainWindow::toMinutesandHours(qint32 zeit_inMin) {
     qint32 minutes = zeit_inMin % 60;
     qint32 stunden = zeit_inMin / 60;
-
-    QString hour_min = Minutes_toString(stunden) + "." + Minutes_toString(minutes);
+    QString hour_min;
+    if(minutes > 9){
+        hour_min = Minutes_toString(stunden) + "." + Minutes_toString(minutes);
+    }
+    else{
+        hour_min = Minutes_toString(stunden) + "." + "0"+ Minutes_toString(minutes);
+    }
 
     return hour_min;
 }
@@ -293,7 +297,6 @@ void MainWindow::update_day(Tagesdaten *data){
     QSqlQuery query;
     qint32 of_int = data->just_Minutes(data->getOffice_time(), "H.mm");
     qint32 fa_int = data->just_Minutes(data->getFlexible_time(), "H.mm");
-    qDebug() << of_int << fa_int;
     QString ges_Str = toMinutesandHours((of_int + fa_int));
     query.prepare(QString("UPDATE [zeitkonto] "
                           "SET office_time = '%1', "
@@ -432,11 +435,12 @@ void MainWindow::on_loadFile_clicked() {
 
             //Soll doppelte Abrechnung der Pausenzeit verhindern
             //Monatsdaten werden jeden Tag um die rohe Arbeitszeit(mit Pausenabzug) addiert
+            //Pause von Bürozeit abziehen
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0) {
                 monats_data.setGes_Nettozeit(day_data.getNetto_int() - day_data.getPausenzeit());
                 day_data.setOffice_time_pause(); //officetime = netto - pause, flexible_time = flex
             }
-            //Homeoffice, wo Pause abgezogen wird
+            //Pause von Homeofficezeit abziehen
             if (day_data.getFlexNetto_int() > 0 && day_data.getNetto_int() == 0) {
                 monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int() - day_data.getPausenzeit());
                 day_data.setFlexible_time_pause(); // flexible_time = flex - pause, office_time = netto
@@ -502,7 +506,7 @@ void MainWindow::fillComboBoxesFromDB(){
         qWarning() << "ERROR: Show Table" << distinctYearSearch.lastError();
     }
     while (distinctYearSearch.next()) {
-        qDebug() << distinctYearSearch.value(0).toString();
+        //qDebug() << distinctYearSearch.value(0).toString();
         ui -> comboBox_begin_year -> addItem(distinctYearSearch.value(0).toString());
         ui -> comboBox_end_year -> addItem(distinctYearSearch.value(0).toString());
     }

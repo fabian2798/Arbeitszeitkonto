@@ -18,5 +18,6 @@ void OptionsWindow::drop_table() {
     if (!query.exec()) {
         qWarning() << "ERROR: Drop Table" << query.lastError();
     }
+
 }
 
