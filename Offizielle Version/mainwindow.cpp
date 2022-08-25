@@ -130,7 +130,6 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
                 data -> setZeit_saldo(endteil_pieces.value(11));
             }
         }
-        qDebug() << mittelteil1 << "mittelteil1";
         qDebug() << anfang<<"anfangszeit";
         qDebug() << ende << "endzeit";
         // Zeiterfassung
@@ -324,7 +323,7 @@ void MainWindow::insert_table(Tagesdaten * data) {
     query.bindValue(":type", data -> getArb_art());
     query.bindValue(":office_time", data -> getOffice_time());
     query.bindValue(":flexible_time", data -> getFlexible_time());
-    query.bindValue(":summary", data -> getNetto_zeit()); //Netto Arbeitszeit am Tag
+    query.bindValue(":summary", (data -> getOffice_time() + data -> getFlexible_time())); //Netto Arbeitszeit am Tag
     db.commit();
     if (!query.exec()) {
         qWarning() << "ERROR: Insert Table " << query.lastError();

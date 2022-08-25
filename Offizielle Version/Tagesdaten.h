@@ -1,8 +1,9 @@
 #ifndef TAGESDATEN_H
 #define TAGESDATEN_H
 
-#include <QDebug>
+#include <QString>
 #include <QTime>
+#include <algorithm>
 
 class Tagesdaten
 {
@@ -109,6 +110,13 @@ public:
 
     void setDaytimesZero();
 
+    const QVarLengthArray<qint32> &getKommt_zeiten() const;
+    void setKommt_zeiten(qint32 &newKommt_zeiten);
+
+    const QVarLengthArray<qint32> &getGeht_zeiten() const;
+    void setGeht_zeiten(qint32 &newGeht_zeiten);
+
+
 private:
     qint32 gesamte_tageszeit = 0;
     qint32 pausenzeit = 0;
@@ -137,6 +145,10 @@ private:
     QVarLengthArray <qint32> geht;
     QVarLengthArray <qint32> flexkommt;
     QVarLengthArray <qint32> flexgeht;
+
+    //Test für Pausenzeit Berechnungen
+    QVarLengthArray<qint32> kommt_zeiten;
+    QVarLengthArray<qint32> geht_zeiten;
 
     QString monthInt;
     QString date;

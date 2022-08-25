@@ -95,7 +95,7 @@ void Tagesdaten::setIn_otherline(bool newIn_otherline)
     this->in_otherline = newIn_otherline;
 }
 
-const QList<QString> &Tagesdaten::getKommt() const
+const QVarLengthArray<QString> &Tagesdaten::getKommt() const
 {
     return this->Kommt;
 }
@@ -107,7 +107,7 @@ void Tagesdaten::setKommt(QString newKommt)
     }
 }
 
-const QList<QString> &Tagesdaten::getGeht() const
+const QVarLengthArray<QString> &Tagesdaten::getGeht() const
 {
     return this->Geht;
 }
@@ -127,7 +127,7 @@ bool Tagesdaten::already_inGeht(QString ende){
     return Kommt.contains(ende);
 }
 
-const QList<QString> &Tagesdaten::getFlexArbkommt() const
+const QVarLengthArray<QString> &Tagesdaten::getFlexArbkommt() const
 {
     return this->flexArbkommt;
 }
@@ -137,11 +137,11 @@ void Tagesdaten::setFlexArbkommt(QString newFlexArb)
     this->flexArbkommt.append(newFlexArb);
 }
 
-bool Tagesdaten::already_inflexArb(QString anfang){// Für Fehlbuchung bei FlexArb, da Regex nicht die letzte Buchung nimmt (z.B 15:30 -)
+bool Tagesdaten::already_inflexArbkommt(QString anfang){// Für Fehlbuchung bei FlexArb, da Regex nicht die letzte Buchung nimmt (z.B 15:30 -)
     return flexArbkommt.contains(anfang);
 }
 
-const QList<QString> &Tagesdaten::getFlexArbgeht() const
+const QVarLengthArray<QString> &Tagesdaten::getFlexArbgeht() const
 {
     return this->flexArbgeht;
 }
@@ -165,7 +165,6 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     //Gleitzeit beachten
     if(!anfang.isEmpty()){
     qint32 anfangint = just_Minutes(anfang);
-    //qDebug() << "anfangint: " << anfangint;
     if(anfangint < 360){
         //qDebug() << "anfang unter 6uhr";
         anfang = "6:00";
@@ -187,91 +186,25 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
         ende = "19:00";
     }
     }
-        //qDebug() << "Anfang";
-    if(!anfang.isEmpty() && !ende.isEmpty() && anfang.compare(ende) != 0){
-        //Fehlbuchung FLexible Arbeit
-        //z.B - 7:04
-        //7:04 - 15:30
-        if(already_inflexArb(anfang) == true){
-            qDebug() << "0.5";
-            flexArbgeht.append(ende);
-        }
-        if(flexArbkommt.size() == 0){
-            qDebug() << "1";
-            this->Kommt.append(anfang);
-            this->Geht.append(ende);
-        }
-        if(arb_art == "FA" && flexArbgeht.size() == flexArbkommt.size() && already_inflexArb(anfang) == false){//Fehlbuchung bei Homeoffice -> wird angezeigt wie Bürotag
-            if(!soll_zeit.isEmpty()){
-                qDebug() << "1.1";
-                //Testfall: 11.08.22 -> Faketest.txt
-                Kommt.append(anfang);
-                Geht.append(ende);
-            }
-            else{
-                //Spezial z.B 27.07.22 -> Journale_juli.txt
-                if(already_inKommt(anfang) == true){
-                    qDebug() << "1.25";
-                    flexArbkommt.append(anfang);
-                    flexArbgeht.append(ende);
-                }
-                //Soll verhindern das vorletzte Buchung als Homeoffice gezählt wird, obwohl es Büro ist
-                else{
-                    Kommt.append(anfang);
-                    Geht.append(ende);
-                }
-            }
-        }
-        if(arb_art == "FA" && flexArbkommt.size() > flexArbgeht.size()){
-            //z.b - 6.35
-            // 6.36 - 14.53
-            // zweiter Begin wird nicht erfasst
-            qDebug() << "1.5";
-            flexArbgeht.append(ende);
-        }
+    //Bürozeit eintragen
+    if(!anfang.isEmpty() && !ende.isEmpty()){
+        //qDebug() << "Bürozeit";
+        Kommt.append(anfang);
+        kommt_zeiten.append(just_Minutes(anfang));
+        Geht.append(ende);
+        geht_zeiten.append(just_Minutes(ende));
     }
-    //mögliche Falschbuchung
-    //wird vermutlich doppelt vorkommen
-    //z.B 15.32 - 15.32
-    else{
-        if(Kommt.contains(anfang) == true && !ende.isEmpty() && anfang.compare(ende) != 0){
-            qDebug() << "2";
-            this->Kommt.append(ende);
+    //Homeoffice eintragen
+    if(anfang.isEmpty() && !ende.isEmpty()){
+        if(flexArbkommt.size() == flexArbgeht.size()){
+        //qDebug() << "Homeoffice Begin";
+        flexArbkommt.append(ende);
+        kommt_zeiten.append(just_Minutes(ende));
         }
-        //z.B 6:20 - 14:41
-        //   14:41 -
-        if(!anfang.isEmpty() && ende.isEmpty()){//Wird bisher nicht vom Regex aufgenommen, siehe übergeordnetes Beispiel
-            //qDebug() << "3";
-            if(already_inGeht(anfang) == false){
-                qDebug() << "3.3";
-                this->Kommt.append(anfang);
-                }
-        }
-        if(!ende.isEmpty() && anfang.isEmpty()){ // Homeoffice Einträge
-            if(ende.compare("0:00") != 0 && already_inflexArb(ende) == false){ // Leerbuchung ausgeschlossen
-                //qDebug() << "4.0";
-                if(flexArbkommt.size() > flexArbgeht.size()){
-                    qDebug() << "4.5";
-                    this->flexArbgeht.append(ende);
-                }
-                if(flexArbkommt.size() < flexArbgeht.size() || flexArbkommt.size() == 0){
-                    qDebug() << "4.75";
-                    this->flexArbkommt.append(ende);
-                }
-                if(flexArbkommt.size() == flexArbgeht.size() && already_inflexArb(ende) == false && flexArbgeht.contains(ende) == false){//erneute Buchung im Homeoffice
-                    qDebug() << "4.8";
-                    this->flexArbkommt.append(ende);
-                }
-            }
-        }
-        if(anfang.compare(ende) == 0 && Kommt.size() > Geht.size()){ //Falschbuchung nur einmal aufnehmen , wenn eine bereits in Kommt enthalten
-              qDebug() << "5";
-            this->Geht.append(anfang);
-        }
-
-        if(anfang.compare(ende) == 0 && (Kommt.size() == Geht.size() || Kommt.size() == 0) && already_inGeht(anfang) == false){ //Falschbuchung nur einmal aufnehmen , erstes Auftreten
-              qDebug() << "6";
-            this->Kommt.append(anfang);
+        if(flexArbgeht.size() < flexArbkommt.size() && already_inflexArbkommt(ende) == false){
+            //qDebug() << "Homeoffice Ende";
+            flexArbgeht.append(ende);
+            geht_zeiten.append(just_Minutes(ende));
         }
     }
 }
@@ -295,6 +228,8 @@ void Tagesdaten::clearAllTimes(){
    zeit_saldo = "";
    office_time = "0.00";
    flexible_time = "0.00";
+   kommt_zeiten.clear();
+   geht_zeiten.clear();
 }
 
 qint32 Tagesdaten::getPausenzeit() const
@@ -308,194 +243,46 @@ void Tagesdaten::setPausenzeit(qint32 newPausenzeit)
 }
 
 void Tagesdaten::calc_breaktime(){
-    bool is_gebucht = false;
-    //qDebug() << "Pausenzeit berechnen";
-    //Nur Büro mit mehreren Buchungen
-    if(kommt.size() == geht.size() && kommt.size() > 1 && flexkommt.size() == 0 && flexgeht.size() == 0){
-        if(kommt.size() > 1 && geht.size() > 1){//Mitarbeiter liebt die Natur und macht seine Pause draußen
-            //qDebug() << "time0.5";
-            for(int i = 0;i<geht.size();i++){
-               //qDebug() <<"i.1"<<i;
-               //qDebug() << kommt[i+1];
-                if(kommt[i+1] == 0){//out of range -- keine weitere buchung
-                    qDebug() << "time0.5 break";
-                    break;
-                }
-                if(geht[i] < kommt[i+1] && kommt[i+1] - geht[i] >= 15){//Pausenzeit wird anerkannt
-                    qDebug() << "time0.75";
-                    pausenzeit = pausenzeit + (kommt[i+1] - geht[i]);
-                }
-                if(kommt[i+1] == kommt.last()){
-                    break;
-                }
-            }
+    bool is_gebucht =false;
+    if(kommt_zeiten.size() > 1 && geht_zeiten.size() > 1){
+        //qDebug() << "in schleife";
+    for(int i = 0;i<geht_zeiten.size();i++){
+        if(kommt_zeiten[i+1] - geht_zeiten[i] >= 15){
+            //qDebug() << "berechen";
+            pausenzeit = pausenzeit + (kommt_zeiten[i+1] - geht_zeiten[i]);
+            //qDebug() << "geht" << geht_zeiten[i] << "kommt" << kommt_zeiten[i+1];
+        }
+        if(kommt_zeiten[i+1] == kommt_zeiten.last()){
+            //qDebug() << "Break beim letzten Kommt";
+            break;
         }
     }
-    //Bürotag mit nur einer Buchung
-    if(kommt.size() == 1 && geht.size() == 1 && flexkommt.size() == 0 && flexgeht.size() == 0){
-        //Mitarbeiter ist ein Stubenhocker und macht keine Pause
-        if(netto_int+flexNetto_int >= 360 && netto_int+flexNetto_int < 540){//über 6h
-            qDebug() << "time3";
-            is_gebucht = true;
-            pausenzeit = 30;
-        }
-        if(netto_int+flexNetto_int >=540){
-            qDebug() << "time4";
-            is_gebucht = true;
-            pausenzeit = 45;//ab 9h
-        }
     }
-    //Nur Homeoffice mit mehreren Buchungen
-    if(flexkommt.size() == flexgeht.size() && flexkommt.size() > 1 && kommt.size() == 0 && geht.size() == 0){
-        if(flexkommt.size() > 1 && flexgeht.size() > 1){//Naturliebhaber im Homeoffice
-            //qDebug() << "time4.5";
-            for(int j = 0;j<flexgeht.size();j++){
-                //qDebug() << "j" << j;
-                if(flexkommt[j+1] == 0){//keine zweite Buchung
-                    qDebug() << "time4.5 break";
-                    break;
-                }
-                if(flexgeht[j] < flexkommt[j+1] && flexkommt[j+1] - flexgeht[j] >= 15){
-                    qDebug() << "time4.75";
-                    pausenzeit = pausenzeit + (flexkommt[j+1] - flexgeht[j]);
-                }
-                if( flexkommt[j+1] == flexkommt.last()){
-                    break;
-                }
-            }
-            //keine pause bei über 6h
-            if(abs(pausenzeit) == 0  && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540){
-                qDebug() << "time5";
-                //qDebug() << "p5.1" << pausenzeit;
-                is_gebucht = true;
-                pausenzeit = 30;
-            }
-            //keine pause bei über 9h
-            if(abs(pausenzeit) == 0 && flexNetto_int+netto_int >= 540){
-                qDebug() << "time6";
-                is_gebucht = true;
-                pausenzeit = 45;
-            }
-        }
-    }
-    //Nur Homeoffice mit einer Buchung -- keine Pause gemacht
-    if(flexkommt.size() == 1 && flexgeht.size() == 1 && kommt.size() == 0 && geht.size() == 0){
-        if(flexNetto_int >= 360 && flexNetto_int < 540){//über 6h
-            qDebug() << "time7";
-            is_gebucht = true;
-            pausenzeit = 30;
-        }
-        if(flexNetto_int+netto_int >= 540){
-            qDebug() << "time8";
-            is_gebucht = true;
-            pausenzeit = 45;//ab 9h
-        }
-    }
-    //Mal Homeoffice und mal Büro
-    if(kommt.size() > 0 && geht.size() > 0 && flexkommt.size() > 0 && flexgeht.size() > 0){
-        qint32 breaked = 0;
-        //erste Buchung = Büro
-        if(kommt[0] < flexkommt[0]){
-            for(int i = 0;i<geht.size();i++){
-                qDebug() << "i.05" << i << geht[i];
-                if(geht.size() == 1 || geht[i+1] == 0){
-                    qDebug() << "time8.6";
-                    breaked = i;
-                    qDebug() << breaked << "breaked";
-                    break;
-                }
-                if(geht[i] < kommt[i+1] && kommt[i+1] - geht[i] >= 15 && geht.size()>1 && kommt[i+1] < flexkommt[0]){
-                    qDebug() << "time8.5";
-                    pausenzeit = pausenzeit + (kommt[i+1] - geht[i]);
-                    qDebug() << pausenzeit << "pausenzeit";
-                }
-                if(geht[i+1] == geht.last()){
-                    qDebug() << "break on future last";
-                    breaked = i;
-                    break;
-                }
-            }
-            qDebug() << "geht[breaked]" << geht[breaked];
-            qDebug() << "flexk first" << flexkommt.first();
-            //Nach dem Büro nur noch am Homeoffice
-            if(geht[breaked] < flexkommt.first()){
-                qDebug() << "time8.55";
-                pausenzeit = pausenzeit + (flexkommt.first() - geht[breaked]);
-                qDebug() << pausenzeit << "breaktime";
-            }
-            //Falls zwischen Bürozeiten Homeoffice gemacht wurde
-            if(breaked -1 > 0){
-                if(geht[breaked-1] < flexkommt.first()){
-                qDebug() << "time8.65";
-                pausenzeit = pausenzeit + (flexkommt.first() - geht[breaked-1]);
-                }
-            }
-        }
-        //erste Buchung = Homeoffice
-        if(flexkommt[0] < kommt[0]){
-            for(int i = 0;i<flexgeht.size();i++){
-                //qDebug() << "i.2" << i;
-                qDebug() << "flexgeht an stelle i" << flexgeht[i];
-                if(flexgeht.size() == 1){
-                    qDebug() << "time8.7";
-                    break;
-                }
-                //Pausenzeit wird anerkannt
-                if(flexgeht[i] < flexkommt[i+1] && flexkommt[i+1] - flexgeht[i] >= 15){
-                    qDebug() << "time8.75";
-                    pausenzeit = pausenzeit + (flexkommt[i+1] - flexgeht[i]);
-                }
-                if(flexgeht[i+1] == flexgeht.last()){
-                    break;
-                }
-            }
-            if(flexgeht.last() < kommt.first() && kommt.first() - flexgeht.last() >= 15){
-                qDebug() << "time8.8";
-                pausenzeit = pausenzeit + (kommt.first()-flexgeht.last());
-                qDebug() << "pause" << pausenzeit;
-            }
-        }
-    }
-    //Falls keine Pause bei 6h gemacht wurde, Pflichtpausenzeit eintragen
-    if(abs(pausenzeit) == 0 && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540){
+    //Nicht vollgenutzte Pausenzeit bei 6h, Rest abziehen
+    if(pausenzeit < 30 && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540){
         is_gebucht = true;
-        qDebug() << "time2.35";
-        pausenzeit = 30;
-    }
-    //Falls keine Pause bei 9h gemacht wurde, Pflichtpausenzeit eintragen
-    if(abs(pausenzeit) == 0 && flexNetto_int+netto_int >= 540){
-        is_gebucht = true;
-        qDebug() << "time2.355";
-        pausenzeit = 45;
-    }
-    //kleine pause gemacht aber noch nicht genug, bei 6h
-    if(abs(pausenzeit) >= 15 && pausenzeit < 30 && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540){
-        qDebug() << "time6.3";
-        qDebug() << "p6.3" << pausenzeit;
+        //qDebug() << "bei 6h" << pausenzeit;
         pausenzeit = 30 - pausenzeit;
     }
-    //kleine pause gemacht aber noch nicht genug ab 9h
-    if(abs(pausenzeit) >= 15 && pausenzeit < 45 && flexNetto_int+netto_int >= 540){
-        qDebug() << "time6.33";
-        qDebug() << "p6.33" << pausenzeit;
+    //Vollgenutzte Pausenzeit bei 6h
+    if(pausenzeit >= 30 && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540 && is_gebucht == false){
+        //qDebug() << "voll genommen bei 6h" << pausenzeit;
+        pausenzeit = 0;
+    }
+    //Nicht vollgenutzte Pausenzeit bei 9h, Rest abziehen
+    if(pausenzeit < 45 && flexNetto_int+netto_int >= 540){
+        is_gebucht = true;
+        //qDebug() << "bei 9h" << pausenzeit;
         pausenzeit = 45 - pausenzeit;
-        qDebug() << pausenzeit << "in time6.33";
     }
-    //genug Pause bei 6h
-    if(abs(pausenzeit) >= 30 && flexNetto_int+netto_int >= 360 && flexNetto_int+netto_int < 540 && is_gebucht == false){
-       //qDebug() << "p2.2" << pausenzeit;
-       qDebug() << "time2.2";
-        pausenzeit = 0; // Pause wurde genommen, Abzug am Schluss nötig
-    }
-    //genug Pause bei 9h
-    if(abs(pausenzeit) >= 45 && flexNetto_int+netto_int >= 540 && is_gebucht == false){
-        //qDebug() << "p2.3" << pausenzeit;
-        qDebug() << "time2.3";
+    //Vollgenutzte Pausenzeit bei 9h
+    if(pausenzeit >= 45 && flexNetto_int+netto_int >= 540 && is_gebucht == false){
+        //qDebug() << "voll genommen bei 9h" << pausenzeit;
         pausenzeit = 0;
     }
 }
 
-const QList<qint32> &Tagesdaten::getRemember_timekommt() const
+const QVarLengthArray<qint32> &Tagesdaten::getRemember_timekommt() const
 {
     return kommt;
 }
@@ -505,7 +292,7 @@ void Tagesdaten::setRemember_timekommt(qint32 newRemember_timekommt)
     kommt.append(newRemember_timekommt);
 }
 
-const QList<qint32> &Tagesdaten::getRemember_timegeht() const
+const QVarLengthArray<qint32> &Tagesdaten::getRemember_timegeht() const
 {
     return geht;
 }
@@ -515,7 +302,7 @@ void Tagesdaten::setRemember_timegeht(qint32 newRemember_timegeht)
     geht.append(newRemember_timegeht);
 }
 
-const QList<qint32> &Tagesdaten::getRemember_timeflexkommt() const
+const QVarLengthArray<qint32> &Tagesdaten::getRemember_timeflexkommt() const
 {
     return flexkommt;
 }
@@ -525,7 +312,7 @@ void Tagesdaten::setRemember_timeflexkommt(qint32 newRemember_timeflexkommt)
     flexkommt.append(newRemember_timeflexkommt);
 }
 
-const QList<qint32> &Tagesdaten::getRemember_timeflexgeht() const
+const QVarLengthArray<qint32> &Tagesdaten::getRemember_timeflexgeht() const
 {
     return flexgeht;
 }
@@ -653,4 +440,24 @@ void Tagesdaten::setMonthInt(const QString &newMonthInt)
 void Tagesdaten::setDaytimesZero(){
     office_time = "0.00";
     flexible_time = "0.00";
+}
+
+const QVarLengthArray<qint32> &Tagesdaten::getKommt_zeiten() const
+{
+    return kommt_zeiten;
+}
+
+void Tagesdaten::setKommt_zeiten(qint32 &newKommt_zeiten)
+{
+    kommt_zeiten.append(newKommt_zeiten);
+}
+
+const QVarLengthArray<qint32> &Tagesdaten::getGeht_zeiten() const
+{
+    return geht_zeiten;
+}
+
+void Tagesdaten::setGeht_zeiten(qint32 &newGeht_zeiten)
+{
+    geht_zeiten.append(newGeht_zeiten);
 }
