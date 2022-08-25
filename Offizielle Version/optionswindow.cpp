@@ -12,7 +12,7 @@ OptionsWindow::~OptionsWindow()
 {
     delete ui;
 }
-
+//delete table -- all data are removed
 void OptionsWindow::drop_table() {
     QSqlQuery query("DROP TABLE zeitkonto");
     if (!query.exec()) {

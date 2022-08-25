@@ -127,7 +127,7 @@ private:
     QString tages_nr = "0";
     QString arb_art;
 
-    //endteil
+    //endteil -- momentan kein nutzen
     QString soll_zeit;
     QString netto_zeit;
     QString zeit_diff;

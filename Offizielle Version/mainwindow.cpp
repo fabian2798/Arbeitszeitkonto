@@ -2,7 +2,8 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget * parent) // Konstructor
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+    : QMainWindow(parent), ui(new Ui::MainWindow)
+{
         ui -> setupUi(this);
         //DB Connection
         const QString DRIVER("QSQLITE");
@@ -36,8 +37,9 @@ MainWindow::~MainWindow() // Destructor
     db.close();
     delete ui;
 }
-
-Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data) {
+//captured all needed data for input file
+Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data)
+{
     QString pattern_monthyear(R"(^(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(\d\d\d\d)$)");
     QString pattern_first(R"(^(Mo|Di|Mi|Do|Fr|Sa|So)\s+1.*Periode\s+([+-]\d{1,4}\.\d{2})*)");
     QString pattern_day(R"(^(\w{2}|\s+)\s+(\d\d?)\s+\d{1,4}\s+\|\s+(\d{1,2}:\d{2})?\s+-?\s{1,2}(\d{1,2}:\d{2})[+ *]{3}\s+(.*)\|(.*)\|(.*))");
@@ -148,7 +150,8 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
     return *data;
 }
 //Büroarbeitszeit berechnen
-Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten * data) {
+Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten * data)
+{
     data -> setRemember_timekommt(begin_inMin);
     data -> setRemember_timegeht(end_inMin);
     qint32 diff_inMin = end_inMin - begin_inMin;
@@ -157,7 +160,8 @@ Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten
     return *data;
 }
 //Homeofficearbeitszeit berechnen
-Tagesdaten MainWindow::end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten * data) {
+Tagesdaten MainWindow::end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten * data)
+{
     data -> setRemember_timeflexkommt(begin_inMin);
     data -> setRemember_timeflexgeht(end_inMin);
     qint32 diff_inMin = end_inMin - begin_inMin;
@@ -165,14 +169,16 @@ Tagesdaten MainWindow::end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesd
     //qDebug() << "Zeit im HO" << data->getFlexNetto_int();
     return *data;
 }
-
-QString MainWindow::Minutes_toString(qint32 zeit_Min) {
+//minutes(int) to minutes(string)
+QString MainWindow::Minutes_toString(qint32 zeit_Min)
+{
     QString str_minutes = QString::number(zeit_Min);
 
     return str_minutes;
 }
-
-QString MainWindow::toMinutesandHours(qint32 zeit_inMin) {
+//minutes(int) in hour.minutes(string)
+QString MainWindow::toMinutesandHours(qint32 zeit_inMin)
+{
     qint32 minutes = zeit_inMin % 60;
     qint32 stunden = zeit_inMin / 60;
     QString hour_min;
@@ -185,8 +191,9 @@ QString MainWindow::toMinutesandHours(qint32 zeit_inMin) {
 
     return hour_min;
 }
-
-QString MainWindow::monthtoInt(monat * m_data) {
+//month names into numbers
+QString MainWindow::monthtoInt(monat * m_data)
+{
     QString monthstr = "0";
     if (m_data -> getMonth().compare("Januar") == 0) {
         monthstr = "01";
@@ -226,15 +233,16 @@ QString MainWindow::monthtoInt(monat * m_data) {
     }
     return monthstr;
 }
-
-void MainWindow::dateString(Tagesdaten *data, monat *m_data){
+//create date for db output
+void MainWindow::dateString(Tagesdaten *data, monat *m_data)
+{
     data->setMonthInt(monthtoInt(m_data));
     QString date = m_data->getYear()+"-"+data->getMonthInt()+"-"+data->getTages_nr();
     data->setDate(date);
 }
 
-
-QString MainWindow::IntToMonth(int month) {
+QString MainWindow::IntToMonth(int month)
+{
     QString monthstr = "0";
     if (month == 1) {
         monthstr = "Januar";
@@ -274,8 +282,9 @@ QString MainWindow::IntToMonth(int month) {
     }
     return monthstr;
 }
-
-void MainWindow::create_table() {
+//creates table if not exists
+void MainWindow::create_table()
+{
     QSqlQuery query("CREATE TABLE IF NOT EXISTS zeitkonto("
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "day TEXT NOT NULL,"
@@ -290,10 +299,10 @@ void MainWindow::create_table() {
     }
 }
 
-
 //Aktualisiert jeden Tag
 //IDEE: Falls zwei verschiedene Journale des gleichen Monats geladen werden, werden alle Tage des Monats geupdatet
-void MainWindow::update_day(Tagesdaten *data){
+void MainWindow::update_day(Tagesdaten *data)
+{
     QSqlQuery query;
     qint32 of_int = data->just_Minutes(data->getOffice_time(), "H.mm");
     qint32 fa_int = data->just_Minutes(data->getFlexible_time(), "H.mm");
@@ -307,8 +316,9 @@ void MainWindow::update_day(Tagesdaten *data){
         qWarning() << "ERROR: Update Table " << query.lastError();
     }
 }
-
-void MainWindow::insert_table(Tagesdaten * data) {
+//Insert data to db if not into it
+void MainWindow::insert_table(Tagesdaten * data)
+{
     // TO DO: Kürzel soll angepasst werden ("" = Office, "FA" = Flexible, "GLT" = Gleittag, "KRK" = Krank, "ABS" = Berufsschule, "F" = Feiertag)
     // Kann auch als Legende eingefügt werden oder durch Hover-Beschreibung
     QSqlQuery query;
@@ -324,8 +334,9 @@ void MainWindow::insert_table(Tagesdaten * data) {
         qWarning() << "ERROR: Insert Table " << query.lastError();
     }
 }
-
-void MainWindow::show_table(QString queryString) {
+//print table in tagesübersicht tab
+void MainWindow::show_table(QString queryString)
+{
     ui->datalist->clear();
     QString row = "";
     qint32 tablerow = 0;
@@ -364,20 +375,23 @@ void MainWindow::show_table(QString queryString) {
 }
 
 //Fenster für Optionen, wie Drop Table
-void MainWindow::on_pushButton_options_clicked() {
+void MainWindow::on_pushButton_options_clicked()
+{
     OptionsWindow * OW = new OptionsWindow();
     OW -> setModal(true);
     OW -> exec();
 }
 
 //Fenster zum Hinweis bei Fragen
-void MainWindow::on_pushButton_help_clicked() {
+void MainWindow::on_pushButton_help_clicked()
+{
     HelpWindow * HW = new HelpWindow();
     HW -> setModal(true);
     HW -> exec();
 }
-
-void MainWindow::on_loadFile_clicked() {
+//read line by line
+void MainWindow::on_loadFile_clicked()
+{
     fileName = QFileDialog::getOpenFileName(this,
         tr("Öffne Zeus Textdatei"), "C:/Projects Qt/arbeitszeitkonto", tr("Zeus Datei (*.csv *.txt)")); // "/home" -> Startverzeichnis ändern
     if (fileName.isEmpty())
@@ -393,7 +407,6 @@ void MainWindow::on_loadFile_clicked() {
     qint32 flexkommt_int;
     qint32 kommt_int;
     qint32 geht_int;
-    QString mView;
 
     ui -> lastFileLoaded -> clear();
 
@@ -497,7 +510,8 @@ void MainWindow::on_loadFile_clicked() {
     fillComboBoxesFromDB();
 }
 
-void MainWindow::fillComboBoxesFromDB(){
+void MainWindow::fillComboBoxesFromDB()
+{
     ui->comboBox_begin_year->clear();
     ui->comboBox_end_year->clear();
     QString queryString = "SELECT DISTINCT strftime('%Y', date) from zeitkonto;";
@@ -524,11 +538,13 @@ void MainWindow::fillComboBoxesFromDB(){
 }
 
 // Button zum Testen von Funktionen
-void MainWindow::on_pushButton_clicked() {
+void MainWindow::on_pushButton_clicked()
+{
     //fillComboBoxesFromDB();
 }
 
-int db_timeToInt(QString string) {
+int db_timeToInt(QString string)
+{
     int minutes = 0;
     QString pattern_int(R"(^([0-9]+)[.]([0-9]+)$)");
     static QRegularExpression re0(pattern_int);
@@ -545,8 +561,8 @@ int db_timeToInt(QString string) {
     return minutes;
 }
 
-
-void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString bm, QString by, QString em, QString ey) {
+void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString bm, QString by, QString em, QString ey)
+{
 
     QListWidget * p = ui -> frame_stats_distribution -> findChild < QListWidget * > ();
     p -> clear();
@@ -690,7 +706,8 @@ void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString b
     }
 }
 
-void MainWindow::on_pushButton_stats_update_clicked() {
+void MainWindow::on_pushButton_stats_update_clicked()
+{
 
     // wenn der gleiche Start und Endmonat eingegeben wird stürzt das Programm ab --> fixen
 

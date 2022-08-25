@@ -35,10 +35,11 @@ public:
     void setFaProzent(qint32 flex, qint32 gesamt);
 
 private:
+    //for calculations
     qint32 ges_Nettozeit;
     qint32 ges_Flexnettozeit;
     qint32 gesamt;
-
+    //for output
     QString month;
     QString year;
     QString ges_nt;

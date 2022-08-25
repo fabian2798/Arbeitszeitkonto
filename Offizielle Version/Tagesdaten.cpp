@@ -160,7 +160,7 @@ void Tagesdaten::setGesamte_tageszeit(qint32 flex, qint32 netto,qint32 pause)
 {
     gesamte_tageszeit = (flex + netto) - pause;
 }
-
+//insert times(string) into arrays
 void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     //Gleitzeit beachten
     if(!anfang.isEmpty()){
@@ -208,7 +208,7 @@ void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
         }
     }
 }
-
+//reset all data collected from a day
 void Tagesdaten::clearAllTimes(){
    Kommt.clear();
    Geht.clear();
@@ -241,7 +241,7 @@ void Tagesdaten::setPausenzeit(qint32 newPausenzeit)
 {
     pausenzeit = newPausenzeit;
 }
-
+//calc breaktime for a day
 void Tagesdaten::calc_breaktime(){
     bool is_gebucht =false;
     if(kommt_zeiten.size() > 1 && geht_zeiten.size() > 1){
@@ -362,10 +362,9 @@ const QString &Tagesdaten::getOffice_time() const
 {
     return office_time;
 }
-
+//pause wird von der bürozeit abgezogen -- Tagesweise
 void Tagesdaten::setOffice_time_pause()
 {
-    //qDebug() << "office";
     netto_int = netto_int - pausenzeit;
 
     qint32 officetime_min = netto_int % 60;
@@ -376,7 +375,7 @@ void Tagesdaten::setOffice_time_pause()
     qint32 flextime_h = flexNetto_int / 60;
     QString f_min = QString::number(flextime_min);
     QString f_h = QString::number(flextime_h);
-
+    // for better readability -- under 10min -> 09,08,07...
     if(officetime_min < 10){
         of_min = "0"+QString::number(officetime_min);
     }
@@ -392,10 +391,9 @@ const QString &Tagesdaten::getFlexible_time() const
 {
     return flexible_time;
 }
-
+//Pause wird von der Homeofficezeit abgezogen -- Tagesweise
 void Tagesdaten::setFlexible_time_pause()
 {
-    //qDebug() << "flex";
     flexNetto_int = flexNetto_int - pausenzeit;
 
     qint32 flextime_min = flexNetto_int % 60;
@@ -407,6 +405,7 @@ void Tagesdaten::setFlexible_time_pause()
     QString f_min = QString::number(flextime_min);
     QString of_min = QString::number(officetime_min);
 
+    // for better readability -- under 10min -> 09,08,07...
     if(officetime_min < 10){
         of_min = "0"+QString::number(officetime_min);
     }
