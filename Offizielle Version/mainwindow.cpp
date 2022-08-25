@@ -364,7 +364,7 @@ void MainWindow::show_table(QString queryString)
         QString of = query.value(3).toString();
         QString fl = query.value(4).toString();
         QString sum = query.value(5).toString();
-        row = day + " " + date + " " + type + " " + of +" " + fl + " " + sum;
+        //row = day + " " + date + " " + type + " " + of +" " + fl + " " + sum;
         //qDebug() << row;
         //Datenbank ausgabe
         ui -> datalist -> setItem(tablerow, 0, new QTableWidgetItem(day));
@@ -592,7 +592,7 @@ void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString b
             QString selectString = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) = '" + bm_with0 + "' ";
             selectString += "AND strftime('%Y', date) = '" + by + "';";
             QSqlQuery q(selectString);
-            qDebug() << selectString;
+            //qDebug() << selectString;
 
             if (!q.isActive()) {
                 qWarning() << "ERROR: Create Table " << q.lastError();
@@ -601,7 +601,7 @@ void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString b
                 while (q.next()) {
                     summen[0] += db_timeToInt(q.value(1).toString());
                     summen[1] += db_timeToInt(q.value(2).toString());
-                    qDebug() << summen[0] << " " << summen[1] << " " << q.value(0).toString();
+                    //qDebug() << summen[0] << " " << summen[1] << " " << q.value(0).toString();
 
                 }
             }
