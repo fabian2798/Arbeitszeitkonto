@@ -19,14 +19,14 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
         fillComboBoxesFromDB();
         ui -> frame_stats_distribution -> setLayout(ChartBuilder::createStatWidget());
         // geht noch nicht mit verschiedenen Startjahren
-        QString currentMonth = QString::number(QDate::currentDate().month());
+        /*QString currentMonth = QString::number(QDate::currentDate().month());
         QString beginMonth = QString::number(QDate::currentDate().month() - 2);
         QString currentYear = QString::number(QDate::currentDate().year());
         getDistribution(&valuesOfChart[0], &valuesOfChart[1], beginMonth , currentYear, currentMonth, currentYear);
         // neues Pie Chart wird erstellt, altes gelöscht
         QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
         delete deleted;
-        ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));
+        ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));*/
         //QMainWindow::showMaximized();
     }
 
@@ -415,8 +415,8 @@ void MainWindow::on_loadFile_clicked() {
         //Ende jedes Tages
         if (day_data.getEnd_line() == true) {
             if (day_data.getKommt().size() > 0) {
-                QList < QString > temp_geht = day_data.getGeht();
-                QList < QString > temp_kommt = day_data.getKommt();
+                QVarLengthArray < QString > temp_geht = day_data.getGeht();
+                QVarLengthArray < QString > temp_kommt = day_data.getKommt();
                 for (int i = 0; i < day_data.getGeht().size(); i++) {
                     kommt_int = day_data.just_Minutes(temp_kommt[i]);
                     geht_int = day_data.just_Minutes(temp_geht[i]);
@@ -424,8 +424,8 @@ void MainWindow::on_loadFile_clicked() {
                 }
             }
             if (day_data.getFlexArbkommt().size() > 0) {
-                QList < QString > temp_flexgeht = day_data.getFlexArbgeht();
-                QList < QString > temp_flexkommt = day_data.getFlexArbkommt();
+                QVarLengthArray < QString > temp_flexgeht = day_data.getFlexArbgeht();
+                QVarLengthArray < QString > temp_flexkommt = day_data.getFlexArbkommt();
                 for (int j = 0; j < day_data.getFlexArbgeht().size(); j++) {
                     flexkommt_int = day_data.just_Minutes(temp_flexkommt[j]);
                     flexgeht_int = day_data.just_Minutes(temp_flexgeht[j]);

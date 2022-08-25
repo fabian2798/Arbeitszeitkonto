@@ -56,7 +56,7 @@ QHBoxLayout * ChartBuilder::createStatWidget(){
     QListWidget * month_list = new QListWidget();
     month_list->setMaximumWidth(400);
     newLayout->addWidget(month_list);
-    newLayout->addWidget(createDistributionChart(60, 40));
+    //newLayout->addWidget(createDistributionChart(0, 0));
     return newLayout;
 }
 

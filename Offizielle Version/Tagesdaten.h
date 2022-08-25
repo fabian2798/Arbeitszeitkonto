@@ -43,22 +43,24 @@ public:
 
     const QList<QString> &getTagesende() const;
 
-    const QList<QString> &getKommt() const;
+    const QVarLengthArray<QString> &getKommt() const;
     void setKommt(QString newKommt);
 
-    const QList<QString> &getGeht() const;
+    const QVarLengthArray<QString> &getGeht() const;
     void setGeht(QString newGeht);
 
     bool already_inKommt(QString anfang);
 
     bool already_inGeht(QString ende);
 
-    const QList<QString> &getFlexArbkommt() const;
+    const QVarLengthArray<QString> &getFlexArbkommt() const;
     void setFlexArbkommt(QString newFlexArb);
 
-    bool already_inflexArb(QString anfang);
+    bool already_inflexArbkommt(QString ende);
 
-    const QList<QString> &getFlexArbgeht() const;
+    bool already_inflexgeht(QString ende);
+
+    const QVarLengthArray<QString> &getFlexArbgeht() const;
     void setFlexArbgeht(QString newFlexArbgeht);
 
     qint32 getGesamte_tageszeit() const;
@@ -78,16 +80,16 @@ public:
     void add_toFlexNetto_int(qint32 newFlexNetto_int);
     void setFlexNetto_int(qint32 newFlexNetto_int);
 
-    const QList<qint32> &getRemember_timekommt() const;
+    const QVarLengthArray<qint32> &getRemember_timekommt() const;
     void setRemember_timekommt(qint32 newRemember_timekommt);
 
-    const QList<qint32> &getRemember_timegeht() const;
+    const QVarLengthArray<qint32> &getRemember_timegeht() const;
     void setRemember_timegeht(qint32 newRemember_timegeht);
 
-    const QList<qint32> &getRemember_timeflexkommt() const;
+    const QVarLengthArray<qint32> &getRemember_timeflexkommt() const;
     void setRemember_timeflexkommt(qint32 newRemember_timeflexkommt);
 
-    const QList<qint32> &getRemember_timeflexgeht() const;
+    const QVarLengthArray<qint32> &getRemember_timeflexgeht() const;
     void setRemember_timeflexgeht(qint32 newRemember_timeflexgeht);
 
     qint32 just_Minutes(QString zeit);
@@ -126,15 +128,15 @@ private:
     QString office_time = "0.00";
     QString flexible_time = "0.00";
     //Listen der Zeitstrings (9:32)
-    QList <QString> Kommt;
-    QList <QString> Geht;
-    QList <QString> flexArbkommt;
-    QList <QString> flexArbgeht;
+    QVarLengthArray <QString> Kommt;
+    QVarLengthArray <QString> Geht;
+    QVarLengthArray <QString> flexArbkommt;
+    QVarLengthArray <QString> flexArbgeht;
     //Listen der Zeiten in Minuten (572)
-    QList <qint32> kommt;
-    QList <qint32> geht;
-    QList <qint32> flexkommt;
-    QList <qint32> flexgeht;
+    QVarLengthArray <qint32> kommt;
+    QVarLengthArray <qint32> geht;
+    QVarLengthArray <qint32> flexkommt;
+    QVarLengthArray <qint32> flexgeht;
 
     QString monthInt;
     QString date;
