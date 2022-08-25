@@ -132,8 +132,8 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
                 data -> setZeit_saldo(endteil_pieces.value(11));
             }
         }
-        qDebug() << anfang<<"anfangszeit";
-        qDebug() << ende << "endzeit";
+        //qDebug() << anfang<<"anfangszeit";
+        //qDebug() << ende << "endzeit";
         // Zeiterfassung
         data -> add_toarbeitszeit(anfang, ende);
     }
@@ -330,7 +330,6 @@ void MainWindow::insert_table(Tagesdaten * data) {
     if (!query.exec()) {
         qWarning() << "ERROR: Insert Table " << query.lastError();
     }
-
 }
 
 void MainWindow::show_table(QString queryString) {
@@ -439,9 +438,9 @@ void MainWindow::on_loadFile_clicked() {
             day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(), day_data.getNetto_int(), day_data.getPausenzeit()); // (Flex+NT) - Pause
 
             //Bürotag, wo Pause abggezogen wird
-            qDebug() << "Pausenzeit: " << day_data.getPausenzeit();
+            //qDebug() << "Pausenzeit: " << day_data.getPausenzeit();
 
-            //Soll doppelte Buchung der Pausenzeit verhindern
+            //Soll doppelte Abrechnung der Pausenzeit verhindern
             //Monatsdaten werden jeden Tag um die rohe Arbeitszeit(mit Pausenabzug) addiert
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0) {
                 monats_data.setGes_Nettozeit(day_data.getNetto_int() - day_data.getPausenzeit());
@@ -455,7 +454,6 @@ void MainWindow::on_loadFile_clicked() {
             //Homeoffice und Büro
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() > 0) {
                 //Pause von der Homeofficezeit abziehen, wenn Homeofficezeit länger als Bürozeit ist
-                if ((day_data.getFlexNetto_int() > day_data.getNetto_int())) {
                 if (day_data.getFlexNetto_int() > day_data.getNetto_int()){
                     monats_data.setGes_Nettozeit(day_data.getNetto_int());
                     monats_data.setGes_Flexnettozeit(day_data.getFlexNetto_int() - day_data.getPausenzeit());
@@ -468,7 +466,7 @@ void MainWindow::on_loadFile_clicked() {
                     day_data.setOffice_time_pause();
                 }
             }
-            }
+
             //Datumszeile
             dateString( & day_data, & monats_data);
 
