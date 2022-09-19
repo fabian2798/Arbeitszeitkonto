@@ -392,7 +392,7 @@ void MainWindow::on_pushButton_help_clicked()
     HW -> setModal(true);
     HW -> exec();
 }
-//read line by line
+//main function
 void MainWindow::on_loadFile_clicked()
 {
     fileName = QFileDialog::getOpenFileName(this,
