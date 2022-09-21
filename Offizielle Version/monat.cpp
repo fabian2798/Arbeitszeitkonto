@@ -90,4 +90,17 @@ void monat::setFaProzent(double newFaProzent)
     faProzent = QString::number(newFaProzent);
 }
 
+const QStringList &monat::getFehlbuchung() const
+{
+    return fehlbuchung;
+}
 
+void monat::setFehlbuchung(QString newFehlbuchung)
+{
+    fehlbuchung.append(newFehlbuchung);
+}
+
+void monat::clearn(){
+    fehlbuchung.clear();
+    kaug = false;
+}

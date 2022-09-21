@@ -45,7 +45,7 @@ QChartView * ChartBuilder::createDistributionChart(int office, int homeoffice){
     QList<QLegendMarker*> test = chart->legend()->markers();
     test.at(0)->setLabel("Office");
     test.at(1)->setLabel("Home Office");
-    chart->setTitle("Büro / Home Office Distribution");
+    chart->setTitle("Office / Home Office Distribution");
     QChartView *chartView = new QChartView(chart);
     return chartView;
 }

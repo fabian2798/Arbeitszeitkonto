@@ -60,7 +60,14 @@ private:
     void fillComboBoxesFromDB();
     void delete_month(Tagesdaten *data);
 
+    void loggingDays(Tagesdaten *day_data);
+
     QSqlDatabase db;
+
+    QString logfilename;
+
+    QVarLengthArray<QString> Logs;
+    void createLogFile();
 
 private slots:
 

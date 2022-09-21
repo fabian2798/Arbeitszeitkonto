@@ -66,6 +66,7 @@ public:
 
     qint32 getGesamte_tageszeit() const;
     void setGesamte_tageszeit(qint32 flex, qint32 netto,qint32 pause);
+    void setGesamte_tageszeit(qint32 pflichtzeit);
 
     void calc_breaktime();
 
@@ -117,12 +118,19 @@ public:
     void setGeht_zeiten(qint32 &newGeht_zeiten);
 
 
+    const QString &getGes_Tageszeit() const;
+    void setGes_Tageszeit(qint32 ges_daytime);
+
+    bool getKaug() const;
+    void setKaug(bool newKaug);
+
 private:
     qint32 gesamte_tageszeit = 0;
     qint32 pausenzeit = 0;
     qint32 netto_int = 0;
     qint32 flexNetto_int = 0;
 
+    QString ges_Tageszeit;
     QString tag;
     QString tages_nr = "0";
     QString arb_art;
@@ -154,6 +162,8 @@ private:
     QString date;
     bool end_line = false;
     bool in_otherline = false;
+
+    bool kaug = false; // KRK,ABS,URL,GLT
 };
 
 

@@ -3,23 +3,23 @@
 
 MainWindow::MainWindow(QWidget * parent) // Konstructor
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-        ui -> setupUi(this);
-        //DB Connection
-        const QString DRIVER("QSQLITE");
-        if (QSqlDatabase::isDriverAvailable(DRIVER)) {
-            db = QSqlDatabase::addDatabase(DRIVER);
-            db.setDatabaseName("zeitdb.db");
-            if (!db.open()) {
-                qWarning() << "ERROR: Connection " << db.lastError();
-            }
+    ui -> setupUi(this);
+    //DB Connection
+    const QString DRIVER("QSQLITE");
+    if (QSqlDatabase::isDriverAvailable(DRIVER)) {
+        db = QSqlDatabase::addDatabase(DRIVER);
+        db.setDatabaseName("zeitdb.db");
+        if (!db.open()) {
+            qWarning() << "ERROR: Connection " << db.lastError();
         }
+    }
 
-        ui->dateEdit_end_date->setDate(QDate::currentDate());
-        show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
-        fillComboBoxesFromDB();
-        ui -> frame_stats_distribution -> setLayout(ChartBuilder::createStatWidget());
-        // geht noch nicht mit verschiedenen Startjahren
-        /*QString currentMonth = QString::number(QDate::currentDate().month());
+    ui->dateEdit_end_date->setDate(QDate::currentDate());
+    show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
+    fillComboBoxesFromDB();
+    ui -> frame_stats_distribution -> setLayout(ChartBuilder::createStatWidget());
+    // geht noch nicht mit verschiedenen Startjahren
+    /*QString currentMonth = QString::number(QDate::currentDate().month());
         QString beginMonth = QString::number(QDate::currentDate().month() - 2);
         QString currentYear = QString::number(QDate::currentDate().year());
         getDistribution(&valuesOfChart[0], &valuesOfChart[1], beginMonth , currentYear, currentMonth, currentYear);
@@ -27,8 +27,8 @@ MainWindow::MainWindow(QWidget * parent) // Konstructor
         QChartView * deleted = ui->frame_stats_distribution->findChild<QChartView *>();
         delete deleted;
         ui->frame_stats_distribution->layout()->addWidget(ChartBuilder::createDistributionChart(valuesOfChart[0], valuesOfChart[1]));*/
-        //QMainWindow::showMaximized();
-    }
+    //QMainWindow::showMaximized();
+}
 
 MainWindow::~MainWindow() // Destructor
 {
@@ -99,8 +99,19 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
         anfang = match2.captured(3);
         ende = match2.captured(4);
 
+        if(anfang == "" && ende == "0:00"){
+            ende = "";
+        }
+
         mittelteil1 = match2.captured(5).trimmed();
 
+        if((mittelteil1.contains("URL")) || (mittelteil1.contains("ABS")) || (mittelteil1.contains("GLT")) || (mittelteil1.contains("KRK")) || (mittelteil1 == "F")){
+
+            if((day != "So") && (day != "Sa")){
+                data->setKaug(true);
+                data->setGesamte_tageszeit(468); //Pflichtarbeitszeit 7.48
+            }
+        }
         //Gesetzt wenn Arbeitskürzel nicht in einer anderen Zeile gefunden wurde
         if (data -> getIn_otherline() == false) {
             data -> setArb_art(mittelteil1);
@@ -110,7 +121,12 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
         if (!day.trimmed().isEmpty()) {
             qDebug() << day << day_nr << mittelteil1;
         }
-
+        //Fehlbuchung
+        if(mittelteil2.contains("Buchung vergessen"))
+        {
+            //qDebug() << "mittelteil2" << mittelteil2;
+            m_data->setFehlbuchung(day_nr);
+        }
         endteil = match2.captured(7);
 
         //Ende des Tageserreicht
@@ -148,7 +164,7 @@ Tagesdaten MainWindow::process_line(QString s, Tagesdaten * data, monat * m_data
 }
 //Büroarbeitszeit berechnen
 Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten * data) {
-    data -> setRemember_timekommt(begin_inMin);
+    data -> setRemember_timekommt(begin_inMin); //Fill Time list
     data -> setRemember_timegeht(end_inMin);
     qint32 diff_inMin = end_inMin - begin_inMin;
     data -> add_toNetto_int(diff_inMin); //gearbeitete Zeit im Büro
@@ -157,7 +173,7 @@ Tagesdaten MainWindow::end_calc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten
 }
 //Homeofficearbeitszeit berechnen
 Tagesdaten MainWindow::end_flexcalc(qint32 begin_inMin, qint32 end_inMin, Tagesdaten * data) {
-    data -> setRemember_timeflexkommt(begin_inMin);
+    data -> setRemember_timeflexkommt(begin_inMin); // fill time list
     data -> setRemember_timeflexgeht(end_inMin);
     qint32 diff_inMin = end_inMin - begin_inMin;
     data -> add_toFlexNetto_int(diff_inMin); //gearbeitete Zeit im Homeoffice
@@ -285,14 +301,14 @@ QString MainWindow::IntToMonth(int month) {
 
 void MainWindow::create_table() {
     QSqlQuery query("CREATE TABLE IF NOT EXISTS zeitkonto("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "day TEXT NOT NULL,"
-        "date TEXT NOT NULL,"
-        "type TEXT NULL,"
-        "office_time TEXT NULL,"
-        "flexible_time TEXT NULL,"
-        "summary TEXT NOT NULL,"
-        "unique(date));");
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "day TEXT NOT NULL,"
+                    "date TEXT NOT NULL,"
+                    "type TEXT NULL,"
+                    "office_time TEXT NULL,"
+                    "flexible_time TEXT NULL,"
+                    "summary TEXT NOT NULL,"
+                    "unique(date));");
     if (!query.isActive()) {
         qWarning() << "ERROR: Create Table " << query.lastError();
     }
@@ -307,7 +323,7 @@ void MainWindow::update_day(Tagesdaten *data){
                           "SET office_time = '%1', "
                           "flexible_time = '%2', "
                           "summary = '%3' "
-                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time(), data->getFlexible_time(), data->getNetto_zeit(), data->getDate()));
+                          "WHERE strftime('%Y-%m-%d',date) IN('%4');").arg(data->getOffice_time(), data->getFlexible_time(), data->getGes_Tageszeit(), data->getDate()));
     if(!query.exec()){
         qWarning() << "ERROR: Update Table " << query.lastError();
     }
@@ -323,7 +339,7 @@ void MainWindow::insert_table(Tagesdaten * data) {
     query.bindValue(":type", data -> getArb_art());
     query.bindValue(":office_time", data -> getOffice_time());
     query.bindValue(":flexible_time", data -> getFlexible_time());
-    query.bindValue(":summary", (data -> getOffice_time() + data -> getFlexible_time())); //Netto Arbeitszeit am Tag
+    query.bindValue(":summary", data -> getGes_Tageszeit()); //Netto Arbeitszeit am Tag
     db.commit();
     if (!query.exec()) {
         qWarning() << "ERROR: Insert Table " << query.lastError();
@@ -336,13 +352,13 @@ void MainWindow::show_table(QString queryString) {
     QString row = "";
     qint32 tablerow = 0;
     ui -> datalist -> setHorizontalHeaderLabels({
-        "Day",
-        "Date",
-        "Type",
-        "Büro",
-        "Home",
-        "Sum"
-    }); //coloum names
+                                                    "Day",
+                                                    "Date",
+                                                    "Type",
+                                                    "Büro",
+                                                    "Home",
+                                                    "Sum"
+                                                }); //coloum names
     ui -> datalist -> setRowCount(93); //Maximal angezeigte Zeilen
     ui -> datalist -> setColumnCount(6);
     QSqlQuery query(queryString);
@@ -356,8 +372,7 @@ void MainWindow::show_table(QString queryString) {
         QString of = query.value(3).toString();
         QString fl = query.value(4).toString();
         QString sum = query.value(5).toString();
-        row = day + " " + date + " " + type + " " + of +" " + fl + " " + sum;
-        //qDebug() << row;
+
         //Datenbank ausgabe
         ui -> datalist -> setItem(tablerow, 0, new QTableWidgetItem(day));
         ui -> datalist -> setItem(tablerow, 1, new QTableWidgetItem(date));
@@ -384,8 +399,9 @@ void MainWindow::on_pushButton_help_clicked() {
 }
 
 void MainWindow::on_loadFile_clicked() {
+
     fileName = QFileDialog::getOpenFileName(this,
-        tr("Öffne Zeus Textdatei"), "C:/Projects Qt/arbeitszeitkonto", tr("Zeus Datei (*.csv *.txt)")); // "/home" -> Startverzeichnis ändern
+                                            tr("Öffne Zeus Textdatei"), "/home", tr("Zeus Datei (*.csv *.txt)")); // "/home" -> Startverzeichnis ändern
     if (fileName.isEmpty())
         return;
     QFile file(fileName);
@@ -399,7 +415,6 @@ void MainWindow::on_loadFile_clicked() {
     qint32 flexkommt_int;
     qint32 kommt_int;
     qint32 geht_int;
-    QString mView;
 
     ui -> lastFileLoaded -> clear();
 
@@ -433,9 +448,13 @@ void MainWindow::on_loadFile_clicked() {
             }
             //Berechne Pausenzeiten
             day_data.calc_breaktime();
+
             //Berechnung der Gesamtarbeitszeit
-            day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(), day_data.getNetto_int(), day_data.getPausenzeit()); // (Flex+NT) - Pause
+            if(day_data.getKaug() == false){ //Doppelbuchung verhindern
+                day_data.setGesamte_tageszeit(day_data.getFlexNetto_int(), day_data.getNetto_int(), day_data.getPausenzeit()); // (Flex+NT) - Pause
+            }
             qDebug() << "Pausenzeit: " << day_data.getPausenzeit();
+
             //Soll doppelte Buchung der Pausenzeit verhindern
             //Monatsdaten werden jeden Tag um die rohe Arbeitszeit(mit Pausenabzug) addiert
             if (day_data.getNetto_int() > 0 && day_data.getFlexNetto_int() == 0) {
@@ -462,22 +481,39 @@ void MainWindow::on_loadFile_clicked() {
             //Datumszeile
             dateString( & day_data, & monats_data);
 
+            day_data.setGes_Tageszeit(day_data.getGesamte_tageszeit());
             qDebug() << "Tagesarbeitszeit: " << day_data.getGesamte_tageszeit();
+            qDebug() << "Tagesarbeitszeit als Timestring: " << day_data.getGes_Tageszeit();
 
             //Datenbank
             insert_table( & day_data);
             update_day(&day_data);
 
-             // Add Tagesgesamt
+            //Logging
+            loggingDays(&day_data);
+
+            // Add Tagesgesamt
             monats_data.setGesamt(day_data.getGesamte_tageszeit());
 
             //Abschluss
             day_data.clearAllTimes(); //QList.clear()
         }
     }
+
     //Show DB
     //qDebug() << "Order: ID, Day, Date, Kürzel, Office_time, Flexible_time, summary";
     show_table("SELECT day,date,type,office_time,flexible_time,summary FROM zeitkonto;");
+
+    //Message falls Fehlbuchungen vorliegen
+    if(!monats_data.getFehlbuchung().isEmpty()){
+        QMessageBox fehler = QMessageBox();
+        fehler.setWindowTitle("Buchungsfehler");
+        fehler.setIcon(QMessageBox::Warning);
+        fehler.setText("Folgende Tage wurden nicht richtig gebucht!");
+        QString message = monats_data.getFehlbuchung().join(',');
+        fehler.setInformativeText("["+monats_data.getMonth()+"] "+message);
+        fehler.exec();
+    }
 
     //Monatsübersicht
     toMinutesandHours( & monats_data); // (Int) Minuten to (String) Hour.Minuten
@@ -485,6 +521,15 @@ void MainWindow::on_loadFile_clicked() {
     file.close();
     ui -> lastFileLoaded -> insertItem(1, fileName);
     fillComboBoxesFromDB();
+
+    //reset fehlbuchung list
+    monats_data.clearn();
+
+    //create logfile + input
+    createLogFile();
+
+    //reset status log box
+    ui->logdata->setChecked(false);
 }
 
 void MainWindow::fillComboBoxesFromDB() {
@@ -660,7 +705,7 @@ void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString b
             }
         }
 
-         p->addItem("Bis " + IntToMonth(em.toInt()) + " " + ey);
+        p->addItem("Bis " + IntToMonth(em.toInt()) + " " + ey);
         // Query für das letzte Jahr
         query = "SELECT date, office_time, flexible_time from zeitkonto WHERE strftime('%m', date) <= '";
         query += bm_with0 + "' AND strftime('%Y', date) = '";
@@ -679,7 +724,6 @@ void MainWindow::getDistribution(int * officesum, int * homeofficesum, QString b
 
 void MainWindow::on_pushButton_stats_update_clicked() {
 
-    // wenn der gleiche Start und Endmonat eingegeben wird stürzt das Programm ab --> fixen
 
     QString begin_month = QString::number(ui -> comboBox_begin_month -> currentIndex() + 1);
     QString end_month = QString::number(ui -> comboBox_end_month -> currentIndex() + 1);
@@ -727,5 +771,34 @@ void MainWindow::on_pushButton_filter_table_clicked()
 
     qDebug() << filterString;
     show_table(filterString);
+}
+
+void MainWindow::loggingDays(Tagesdaten *day){
+    if(ui->logdata->isChecked()){
+        if(day->getArb_art().isEmpty()){
+            day->setArb_art("  ");
+            qDebug() << day->getArb_art();
+        }
+        QString log = QString("%1| %2 | %3 |%4| %5\n").
+                arg(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm:ss")).
+                arg(day->getTag()).arg(day->getTages_nr()).
+                arg(day->getArb_art()).
+                arg(day->getGes_Tageszeit());
+        Logs.append(log);
+    }
+}
+
+void MainWindow::createLogFile(){
+    if(ui->logdata->isChecked()){
+        QString logfilename = QFileDialog::getSaveFileName(this,"Datei speichern","/"+QDate::currentDate().toString("dd_MM_yyyy")+"_LogFile","(*.log)");
+        QFile logfile(logfilename);
+        logfile.open(QIODevice::WriteOnly | QIODevice::Append);
+        QTextStream logIn(&logfile);
+        foreach (QString str, Logs) {
+            logIn << str;
+        }
+        Logs.clear();
+        logfile.close();
+    }
 }
 

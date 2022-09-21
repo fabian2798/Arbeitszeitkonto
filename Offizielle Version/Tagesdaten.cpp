@@ -161,6 +161,12 @@ void Tagesdaten::setGesamte_tageszeit(qint32 flex, qint32 netto,qint32 pause)
     gesamte_tageszeit = (flex + netto) - pause;
 }
 
+//@Override
+void Tagesdaten::setGesamte_tageszeit(qint32 pflichtzeit)
+{
+    gesamte_tageszeit = pflichtzeit;
+}
+
 void Tagesdaten::add_toarbeitszeit(QString anfang, QString ende){
     //Gleitzeit beachten
     if(!anfang.isEmpty()){
@@ -230,6 +236,8 @@ void Tagesdaten::clearAllTimes(){
    flexible_time = "0.00";
    kommt_zeiten.clear();
    geht_zeiten.clear();
+   ges_Tageszeit = "";
+   kaug = false;
 }
 
 qint32 Tagesdaten::getPausenzeit() const
@@ -460,4 +468,32 @@ const QVarLengthArray<qint32> &Tagesdaten::getGeht_zeiten() const
 void Tagesdaten::setGeht_zeiten(qint32 &newGeht_zeiten)
 {
     geht_zeiten.append(newGeht_zeiten);
+}
+
+const QString &Tagesdaten::getGes_Tageszeit() const
+{
+    return ges_Tageszeit;
+}
+
+void Tagesdaten::setGes_Tageszeit(qint32 ges_daytime)
+{
+    qint32 temp_hour = ges_daytime / 60;
+    qint32 temp_min = ges_daytime % 60;
+    if(temp_min > 9){
+    ges_Tageszeit = QString::number(temp_hour) +"."+QString::number(temp_min);
+    }
+    else{
+        ges_Tageszeit = QString::number(temp_hour) +".0"+QString::number(temp_min);
+    }
+
+}
+
+bool Tagesdaten::getKaug() const
+{
+    return kaug;
+}
+
+void Tagesdaten::setKaug(bool newKaug)
+{
+    kaug = newKaug;
 }

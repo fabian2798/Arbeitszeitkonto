@@ -34,6 +34,11 @@ public:
     const QString &getFaProzent() const;
     void setFaProzent(double newFaProzent);
 
+    const QStringList &getFehlbuchung() const;
+    void setFehlbuchung(QString newFehlbuchung);
+
+    void clearn();
+
 private:
     qint32 ges_Nettozeit;
     qint32 ges_Flexnettozeit;
@@ -45,6 +50,11 @@ private:
     QString ges_fnt;
     QString gesamtzeit;
     QString faProzent;
+
+    bool kaug = false; // KRK,ABS,URL,GLT
+
+    //Fehlbuchungstage
+    QStringList fehlbuchung;
 
 };
 
