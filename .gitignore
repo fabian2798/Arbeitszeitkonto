@@ -7,5 +7,5 @@
 *.txt
 
 # build-dateien
-C:\Users\fabif\OneDrive\Desktop\SVLFG\Arbeitszeitkonto\build-arbeitszeitkonto-Desktop_Qt_6_2_1_MinGW_64_bit-Debug
-C:\Users\fabif\OneDrive\Desktop\SVLFG\Arbeitszeitkonto\build-arbeitszeitkonto-Desktop_Qt_6_2_1_MinGW_64_bit-Release
+**/build-arbeitszeitkonto-Desktop_Qt_6_2_1_MinGW_64_bit-Debug
+**/build-arbeitszeitkonto-Desktop_Qt_6_2_1_MinGW_64_bit-Release
