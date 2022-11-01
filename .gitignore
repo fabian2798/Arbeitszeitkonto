@@ -1,5 +1,5 @@
 # QT-pro File
-*.user
+*.pro.user
 *.pro
 
 # journale
